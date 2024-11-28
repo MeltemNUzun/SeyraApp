@@ -38,3 +38,12 @@ func DeleteServer(serverID int) error {
 	return nil
 
 }
+
+/*func GetLogsByServerId(serverID int) ([]models.Log, error) {
+	logs, err := repository.GetLogsByServerId(serverID)
+	if err != nil {
+		logger.Logger().Error("Error fetching logs", zap.Error(err))
+		return nil, err
+	}
+	return logs, nil
+}*/

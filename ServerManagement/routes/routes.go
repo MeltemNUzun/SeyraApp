@@ -63,6 +63,7 @@ func SetupRouter() *gin.Engine {
 		v1.GET("/servers", handlers.Servers)
 		v1.POST("/add-server", handlers.AddServer)
 		v1.DELETE("/delete-server/:server_id", handlers.DeleteServer)
+		v1.GET("/logs/:server_id", handlers.GetLogsByServerId)
 	}
 
 	return router

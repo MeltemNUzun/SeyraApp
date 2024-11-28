@@ -90,3 +90,8 @@ func DeleteServerById(serverId int) error {
 	logger.Logger().Info("Server deleted successfully", zap.Int("ServerId", serverId))
 	return nil
 }
+
+/*func GetLogsByServerId(serverId int) ([]models.Log, error) {
+
+	return nil, nil
+}*/

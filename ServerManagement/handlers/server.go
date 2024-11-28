@@ -116,3 +116,25 @@ func DeleteServer(c *gin.Context) {
 	logger.Logger().Info("Server deleted successfully")
 	c.JSON(http.StatusOK, nil)
 }
+func GetLogsByServerId(c *gin.Context) {
+	// Get request parameter
+	serverIdStr := c.Param("server_id")
+
+	// Convert serverId from string to int
+	serverId, err := strconv.Atoi(serverIdStr)
+	if err != nil {
+		logger.Logger().Error("Invalid server_id", zap.Int("server_id", serverId))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid server_id"})
+		return
+	}
+
+	//logs, err := services.GetLogsByServerId(serverId)
+	if err != nil {
+		logger.Logger().Error("Error fetching logs", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching logs"})
+		return
+	}
+
+	logger.Logger().Info("Logs fetched successfully")
+	//c.JSON(http.StatusOK, logs)
+}
