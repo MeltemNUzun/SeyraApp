@@ -47,7 +47,10 @@ func AddServer(c *gin.Context) {
 		ServerName:   req.ServerName,
 		ServerTypeId: req.ServerTypeId,
 		IPAddress:    req.IPAddress,
-		Vendor:       req.Vendor,
+		Vendor: sql.NullString{
+			String: req.Vendor,
+			Valid:  req.Vendor != "",
+		},
 		ServerUsername: sql.NullString{
 			String: req.ServerUsername,
 			Valid:  req.ServerUsername != "", // Boş değilse Valid true

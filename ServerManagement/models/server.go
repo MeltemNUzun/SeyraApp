@@ -13,7 +13,7 @@ type Server struct {
 	ServerName     string         `json:"server_name"`
 	ServerTypeId   int            `json:"server_type_id"`
 	IPAddress      string         `json:"ip_address"`
-	Vendor         string         `json:"vendor"`
+	Vendor         sql.NullString `json:"vendor"`
 	ServerUsername sql.NullString `json:"server_username"`
 	ServerPassword sql.NullString `json:"server_password"`
 }
