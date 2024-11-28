@@ -8,9 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
+
+var jwtSecret = []byte("your_secret_key")
 
 // Login handles the login request by authenticating the user and returning a token.
 func Login(c *gin.Context) {
@@ -213,4 +216,78 @@ func UpdateUserRole(c *gin.Context) {
 func Logout(c *gin.Context) {
 	c.SetCookie("auth_token", "", -1, "/", "", false, true) // Secure and HttpOnly set appropriately
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
+}
+
+// Reset Password Handler
+func ResetPasswordHandler(c *gin.Context) {
+	var req struct {
+		Token    string `json:"token"`
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Logger().Error("Invalid request body", zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// Parse and validate the token
+	token, err := jwt.Parse(req.Token, func(token *jwt.Token) (interface{}, error) {
+		// Token'ı imzalamak için kullanılan secret anahtarını döndürür
+		return jwtSecret, nil
+	})
+
+	if err != nil {
+		logger.Logger().Error("Error parsing token", zap.Error(err))
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+		return
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID := int(claims["userID"].(float64))
+
+		// Hash the new password (optional)
+		hashedPassword := req.Password // Şifre hashing kütüphanesi kullanılabilir
+
+		// Update the password in the database
+		err := services.UpdateUserPassword(userID, hashedPassword)
+		if err != nil {
+			logger.Logger().Error("Error updating password", zap.Error(err))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Password could not be updated"})
+			return
+		}
+
+		logger.Logger().Info("Password updated successfully", zap.Int("user_id", userID))
+		c.JSON(http.StatusOK, gin.H{"message": "Password successfully updated"})
+	} else {
+		logger.Logger().Error("Invalid or expired token")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+	}
+}
+func ForgotPasswordHandler(c *gin.Context) {
+	var req struct {
+		Email string `json:"email"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Logger().Error("Invalid request body", zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// Logic for sending password reset link
+	userID, err := services.VerifyEmail(req.Email)
+	if err != nil {
+		logger.Logger().Error("Error verifying email", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error verifying email"})
+		return
+	}
+
+	// Generate a reset token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": userID,
+		"exp":    time.Now().Add(15 * time.Minute).Unix(),
+	})
+	tokenString, _ := token.SignedString([]byte("your_secret_key"))
+
+	// Send the reset email (email sending logic should be added here)
+	logger.Logger().Info("Password reset link sent", zap.String("email", req.Email))
+	c.JSON(http.StatusOK, gin.H{"message": "Password reset link sent", "reset_token": tokenString})
 }

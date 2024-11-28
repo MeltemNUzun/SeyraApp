@@ -61,7 +61,8 @@ func SetupRouter() *gin.Engine {
 		v1.GET("/servers", handlers.Servers)
 		v1.POST("/add-server", handlers.AddServer)
 		v1.DELETE("/delete-server/:server_id", handlers.DeleteServer)
-		//v1.GET("/user", handlers.User)
+		v1.POST("/forgot-password", handlers.ForgotPasswordHandler)
+		v1.POST("/reset-password", handlers.ResetPasswordHandler)
 	}
 
 	return router

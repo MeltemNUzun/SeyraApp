@@ -2,6 +2,7 @@ package services
 
 import (
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"server-management/logger"
@@ -87,5 +88,33 @@ func UpdateUserRole(userId int, roleId int) error {
 		logger.Logger().Error("Error updating user role", zap.Error(err))
 		return err
 	}
+	return nil
+}
+func VerifyEmail(email string) (bool, error) {
+	// E-posta doğrulama işlemini buraya yazın
+	if email == "" {
+		return false, errors.New("e-posta boş olamaz")
+	}
+	// Örneğin, e-posta formatı kontrol edilebilir
+	return true, nil // Gerçek doğrulama işlemi burada yapılmalı
+}
+func UpdateUserPassword(userID int, password string) error {
+	// Hash the password here if needed
+	hashedPassword := password // Şifre hashing kütüphanesi kullanılabilir
+
+	// Veritabanı bağlantısı ve şifre güncelleme işlemleri
+	db, err := sql.Open("mysql", "user:password@tcp(localhost:3306)/dbname")
+	if err != nil {
+		logger.Logger().Error("Error connecting to the database", zap.Error(err))
+		return err
+	}
+	defer db.Close()
+
+	_, err = db.Exec("UPDATE users SET password = ? WHERE id = ?", hashedPassword, userID)
+	if err != nil {
+		logger.Logger().Error("Error updating password", zap.Error(err))
+		return err
+	}
+
 	return nil
 }
