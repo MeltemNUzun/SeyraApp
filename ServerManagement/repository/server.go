@@ -13,10 +13,11 @@ import (
 // AddServer adds a new server to the system.
 func AddServer(server models.Server) error {
 	_, err := database.DB.Exec(
-		"INSERT INTO dbo.Server (ServerName, ServerTypeId, IPAddress, ServerUsername, ServerPassword) VALUES (@ServerName, @ServerTypeId, @IPAddress, @ServerUsername, @ServerPassword)",
+		"INSERT INTO dbo.Server (ServerName, ServerTypeId, IPAddress,Vendor, ServerUsername, ServerPassword) VALUES (@ServerName, @ServerTypeId, @IPAddress,@Vendor, @ServerUsername, @ServerPassword)",
 		sql.Named("ServerName", server.ServerName),
 		sql.Named("ServerTypeId", server.ServerTypeId),
 		sql.Named("IPAddress", server.IPAddress),
+		sql.Named("Vendor", server.Vendor),
 		sql.Named("ServerUsername", server.ServerUsername),
 		sql.Named("ServerPassword", server.ServerPassword),
 	)

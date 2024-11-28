@@ -35,6 +35,7 @@ func AddServer(c *gin.Context) {
 		IPAddress      string `json:"ip_address"`
 		ServerPassword string `json:"server_password"`
 		ServerUsername string `json:"server_username"`
+		Vendor         string `json:"vendor"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -46,6 +47,7 @@ func AddServer(c *gin.Context) {
 		ServerName:   req.ServerName,
 		ServerTypeId: req.ServerTypeId,
 		IPAddress:    req.IPAddress,
+		Vendor:       req.Vendor,
 		ServerUsername: sql.NullString{
 			String: req.ServerUsername,
 			Valid:  req.ServerUsername != "", // Boş değilse Valid true
