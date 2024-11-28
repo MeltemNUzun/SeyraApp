@@ -33,9 +33,9 @@ func AddServer(c *gin.Context) {
 		ServerName     string `json:"server_name"`
 		ServerTypeId   int    `json:"server_type_id"`
 		IPAddress      string `json:"ip_address"`
-		ServerPassword string `json:"server_password"`
-		ServerUsername string `json:"server_username"`
 		Vendor         string `json:"vendor"`
+		ServerUsername string `json:"server_username"`
+		ServerPassword string `json:"server_password"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
