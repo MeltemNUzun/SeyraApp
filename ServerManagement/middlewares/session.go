@@ -57,7 +57,6 @@ func ValidateToken() gin.HandlerFunc {
 			return jwtKey, nil
 		})
 
-		fmt.Println("token:", tokenString)
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()

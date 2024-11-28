@@ -41,6 +41,8 @@ func SetupRouter() *gin.Engine {
 
 	// Public routes without middleware
 	router.POST("/api/v1/login", handlers.Login)
+	router.POST("/api/v1/forgot-password", handlers.ForgotPasswordHandler)
+	router.POST("/api/v1/reset-password", handlers.ResetPasswordHandler)
 	// Ping Route
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -61,8 +63,6 @@ func SetupRouter() *gin.Engine {
 		v1.GET("/servers", handlers.Servers)
 		v1.POST("/add-server", handlers.AddServer)
 		v1.DELETE("/delete-server/:server_id", handlers.DeleteServer)
-		v1.POST("/forgot-password", handlers.ForgotPasswordHandler)
-		v1.POST("/reset-password", handlers.ResetPasswordHandler)
 	}
 
 	return router

@@ -2,7 +2,6 @@ package services
 
 import (
 	"crypto/sha256"
-	"database/sql"
 	"encoding/hex"
 	"errors"
 	"server-management/logger"
@@ -13,8 +12,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// hashPasswordSHA256 hashes a password using SHA-256.
-func hashPasswordSHA256(password string) string {
+// HashPasswordSHA256 hashes a password using SHA-256.
+func HashPasswordSHA256(password string) string {
 	hash := sha256.Sum256([]byte(password))
 	return hex.EncodeToString(hash[:])
 }
@@ -28,7 +27,7 @@ func AuthenticateUser(username, password string) (string, error) {
 	}
 
 	// Hash the provided password and compare with the stored hash
-	hashedPassword := hashPasswordSHA256(password)
+	hashedPassword := HashPasswordSHA256(password)
 	if hashedPassword != user.PasswordHash {
 		return "", errors.New("invalid password")
 	}
@@ -47,7 +46,7 @@ func AuthenticateUser(username, password string) (string, error) {
 func RegisterUser(username, password string, roleId int, email string) error {
 
 	// Hash the password using SHA-256
-	passwordHash := hashPasswordSHA256(password)
+	passwordHash := HashPasswordSHA256(password)
 
 	// Add user to the repository
 	err := repository.AddUser(username, passwordHash, email, roleId)
@@ -90,31 +89,15 @@ func UpdateUserRole(userId int, roleId int) error {
 	}
 	return nil
 }
-func VerifyEmail(email string) (bool, error) {
+func VerifyEmail(email string) (int, error) {
 	// E-posta doğrulama işlemini buraya yazın
 	if email == "" {
-		return false, errors.New("e-posta boş olamaz")
+		return 0, errors.New("e-posta boş olamaz")
+	}
+	id, err := repository.GetUserIdByEmailAddress(email)
+	if err != nil {
+		return 0, errors.New("e-posta bulunamadı")
 	}
 	// Örneğin, e-posta formatı kontrol edilebilir
-	return true, nil // Gerçek doğrulama işlemi burada yapılmalı
-}
-func UpdateUserPassword(userID int, password string) error {
-	// Hash the password here if needed
-	hashedPassword := password // Şifre hashing kütüphanesi kullanılabilir
-
-	// Veritabanı bağlantısı ve şifre güncelleme işlemleri
-	db, err := sql.Open("mysql", "user:password@tcp(localhost:3306)/dbname")
-	if err != nil {
-		logger.Logger().Error("Error connecting to the database", zap.Error(err))
-		return err
-	}
-	defer db.Close()
-
-	_, err = db.Exec("UPDATE users SET password = ? WHERE id = ?", hashedPassword, userID)
-	if err != nil {
-		logger.Logger().Error("Error updating password", zap.Error(err))
-		return err
-	}
-
-	return nil
+	return id, nil
 }

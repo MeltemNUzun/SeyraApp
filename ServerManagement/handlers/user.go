@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"server-management/logger"
+	"server-management/repository"
 	"server-management/services"
 	"strconv"
 	"time"
@@ -260,10 +261,10 @@ func ResetPasswordHandler(c *gin.Context) {
 		userID := int(claims["userID"].(float64))
 
 		// Hash the new password (optional)
-		hashedPassword := req.Password // Şifre hashing kütüphanesi kullanılabilir
+		hashedPassword := services.HashPasswordSHA256(req.Password)
 
 		// Update the password in the database
-		err := services.UpdateUserPassword(userID, hashedPassword)
+		err = repository.UpdateUserPassword(userID, hashedPassword)
 		if err != nil {
 			logger.Logger().Error("Error updating password", zap.Error(err))
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Password could not be updated"})
@@ -272,9 +273,6 @@ func ResetPasswordHandler(c *gin.Context) {
 
 		logger.Logger().Info("Password updated successfully", zap.Int("user_id", userID))
 		c.JSON(http.StatusOK, gin.H{"message": "Password successfully updated"})
-	} else {
-		logger.Logger().Error("Invalid or expired token")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 	}
 }
 
@@ -302,6 +300,14 @@ func ForgotPasswordHandler(c *gin.Context) {
 		"exp":    time.Now().Add(15 * time.Minute).Unix(),
 	})
 	tokenString, _ := token.SignedString(jwtSecret)
+
+	//add code to send email
+	err = services.M.SendEmail([]string{req.Email}, "Password Reset", "Click the link to reset your password: http://localhost:3000/reset-password/"+tokenString)
+	if err != nil {
+		logger.Logger().Error("Error sending email", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error sending email"})
+		return
+	}
 
 	// Send the reset email (email sending logic should be added here)
 	logger.Logger().Info("Password reset link sent", zap.String("email", req.Email))
