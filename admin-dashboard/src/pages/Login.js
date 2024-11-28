@@ -20,33 +20,26 @@ function Login() {
           password: password,
         },
         {
-          withCredentials: true, // allow cookies if needed
+          withCredentials: true,
         }
       );
 
       if (response.data.message === 'Login successful') {
         const token = response.data.token;
-
-        // Store the token in memory or local storage (consider security implications)
         localStorage.setItem('auth_token', token);
-
-        // Show success notification
         showNotification('Login successful', 'success');
         navigate('/home');
       }
     } catch (error) {
       console.error('Login error:', error);
-      // Show error notification
       showNotification('Invalid credentials', 'error');
     }
   };
 
-  // Function to show notifications
   const showNotification = (message, severity) => {
     setNotification({ open: true, message, severity });
   };
 
-  // Function to close notifications
   const handleNotificationClose = () => {
     setNotification({ ...notification, open: false });
   };
@@ -62,6 +55,56 @@ function Login() {
       }}
     >
       <Container component="main" maxWidth="sm">
+        {/* SEYRA Başlık ve Logo */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '40px',
+          }}
+        >
+          {/* Logo */}
+          <img
+            src={`${process.env.PUBLIC_URL}/seyra-logo.png`}
+            alt="Seyra Logo"
+            style={{
+              width: '100px',
+              height: '100px',
+              borderRadius: '50%',
+              marginRight: '12px',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+            }}
+          />
+          {/* SEYRA Yazısı */}
+          <Box>
+            <Typography
+              component="h1"
+              variant="h3"
+              sx={{
+                fontWeight: 'bold',
+                fontSize: '3rem',
+                color: '#ffffff',
+                fontFamily: "'Poppins', sans-serif",
+                textShadow: '3px 3px 6px rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              SEYRA
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: '#F3F4F6',
+                fontSize: '1.2rem',
+                marginTop: '5px',
+                fontFamily: "'Roboto', sans-serif",
+              }}
+            >
+              Sunucu Yönetim Sistemi
+            </Typography>
+          </Box>
+        </Box>
+
         <Paper
           elevation={8}
           sx={{
@@ -71,33 +114,39 @@ function Login() {
             textAlign: 'center',
           }}
         >
-          {/* Logo Area */}
-          <Avatar
+          {/* Giriş Yap Bölümü */}
+          <Box
             sx={{
-              bgcolor: '#9C27B0',
-              width: 80,
-              height: 80,
-              marginBottom: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '20px',
             }}
           >
-            <LockOutlinedIcon sx={{ fontSize: 40 }} />
-          </Avatar>
-
-          {/* Login Heading */}
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{
-              fontWeight: 'bold',
-              fontSize: '2.5rem',
-              color: '#6A1B9A',
-              marginBottom: '30px',
-              fontFamily: "'Poppins', sans-serif", // Font from Google Fonts
-              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)', // Light shadow effect
-            }}
-          >
-            LOGIN
-          </Typography>
+            <Avatar
+              sx={{
+                bgcolor: '#9C27B0',
+                width: 80, // Avatar büyütüldü
+                height: 80, // Avatar büyütüldü
+                marginRight: '15px', // Yazıdan uzaklık
+              }}
+            >
+              <LockOutlinedIcon sx={{ fontSize: 40, color: '#ffffff' }} />
+            </Avatar>
+            <Typography
+              component="h2"
+              variant="h5"
+              sx={{
+                fontWeight: 'bold',
+                color: '#6A1B9A',
+                fontFamily: "'Poppins', sans-serif",
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.4)',
+                fontSize: '2.0rem',
+              }}
+            >
+              Giriş Yap
+            </Typography>
+          </Box>
 
           {/* Login Form */}
           <form onSubmit={handleLogin} style={{ width: '100%' }}>
@@ -107,7 +156,7 @@ function Login() {
               required
               fullWidth
               id="username"
-              label="Username"
+              label="Kullanıcı Adı"
               name="username"
               autoComplete="username"
               autoFocus
@@ -126,7 +175,7 @@ function Login() {
               required
               fullWidth
               name="password"
-              label="Password"
+              label="Şifre"
               type="password"
               id="password"
               autoComplete="current-password"
@@ -156,14 +205,14 @@ function Login() {
                 boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)',
               }}
             >
-              Login
+              Giriş Yap
             </Button>
           </form>
 
           {/* Forgot Password Link */}
           <Typography sx={{ marginTop: '20px' }}>
             <Link href="/forgot-password" variant="body2" sx={{ color: '#6A1B9A', textDecoration: 'underline' }}>
-              Forgot your password?
+              Şifremi Unuttum
             </Link>
           </Typography>
         </Paper>

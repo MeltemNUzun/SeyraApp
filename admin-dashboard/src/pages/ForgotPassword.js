@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Paper, Avatar, Snackbar, Alert } from '@mui/material';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import { useNavigate } from 'react-router-dom'; 
-//sssss
+import { useNavigate } from 'react-router-dom';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -13,7 +12,6 @@ function ForgotPassword() {
     e.preventDefault();
     // Backend işlemleri daha sonra eklenecek
     showNotification(`Şifre sıfırlama bağlantısı ${email} adresine gönderildi`, 'success');
-
   };
 
   const handleBackToLogin = () => {
@@ -41,6 +39,57 @@ function ForgotPassword() {
       }}
     >
       <Container component="main" maxWidth="sm">
+        {/* SEYRA Başlık ve Logo */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '40px',
+          }}
+        >
+          {/* Logo */}
+          <img
+            src={`${process.env.PUBLIC_URL}/seyra-logo.png`}
+            alt="Seyra Logo"
+            style={{
+              width: '100px',
+              height: '100px',
+              borderRadius: '50%',
+              marginRight: '12px',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+            }}
+          />
+          {/* SEYRA Yazısı */}
+          <Box>
+            <Typography
+              component="h1"
+              variant="h3"
+              sx={{
+                fontWeight: 'bold',
+                fontSize: '3rem',
+                color: '#ffffff',
+                fontFamily: "'Poppins', sans-serif",
+                textShadow: '3px 3px 6px rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              SEYRA
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: '#F3F4F6',
+                fontSize: '1.2rem',
+                marginTop: '5px',
+                fontFamily: "'Roboto', sans-serif",
+              }}
+            >
+              Sunucu Yönetim Sistemi
+            </Typography>
+          </Box>
+        </Box>
+        
+
         <Paper
           elevation={8}
           sx={{
@@ -50,32 +99,40 @@ function ForgotPassword() {
             textAlign: 'center',
           }}
         >
-          <Avatar
+          {/* Logo ve Başlık */}
+          <Box
             sx={{
-              bgcolor: '#9C27B0',
-              width: 80,
-              height: 80,
-              marginBottom: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '20px',
             }}
           >
-            <MailOutlineIcon sx={{ fontSize: 40 }} />
-          </Avatar>
+            <Avatar
+              sx={{
+                bgcolor: '#9C27B0',
+                width: 60,
+                height: 60,
+                marginRight: '10px',
+              }}
+            >
+              <MailOutlineIcon sx={{ fontSize: 30 }} />
+            </Avatar>
+            <Typography
+              component="h1"
+              variant="h4"
+              sx={{
+                fontWeight: 'bold',
+                fontSize: '2rem',
+                color: '#6A1B9A',
+                fontFamily: "'Poppins', sans-serif",
+              }}
+            >
+              Şifremi Unuttum
+            </Typography>
+          </Box>
 
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{
-              fontWeight: 'bold',
-              fontSize: '2.5rem',
-              color: '#6A1B9A',
-              marginBottom: '30px',
-              fontFamily: "'Poppins', sans-serif",
-              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.2)',
-            }}
-          >
-            Şifremi Unuttum
-          </Typography>
-
+          {/* Form */}
           <form onSubmit={handleForgotPassword} style={{ width: '100%' }}>
             <TextField
               variant="outlined"

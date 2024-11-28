@@ -1,13 +1,46 @@
-body {
+/* Genel ayarlar */
+html, body {
   margin: 0;
+  padding: 0; /* Varsayılan padding'i sıfırla */
+  height: 100%; /* Ekran yüksekliğini tamamen kapla */
+  overflow-x: hidden; /* Yatay kaydırmayı engelle */
+  overflow-y: auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #D16BA5, #86A8E7, #5FFBF1); /* Gradient arka plan */
+  background-attachment: fixed; /* Arka plan sabit kalsın */
+  background-size: cover; /* Tam ekranı kaplayacak şekilde ölçekle */
 }
 
+
+/* Kod blokları için özel font */
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Sayfa başlıkları için özel tasarım */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  color: #333;
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.5; /* Daha iyi okuma için satır yüksekliği */
+}
+
+/* Varsayılan link stili */
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+#root {
+  min-height: 100%; /* İçeriğin ekranın tamamını kaplamasını sağla */
+  display: flex;
+  flex-direction: column; /* İçerikleri dikeyde alt alta yerleştir */
+  justify-content: flex-start; /* Üstten başlasın */
+  box-sizing: border-box; /* Taşmaları önlemek için kutu boyutlaması */
 }

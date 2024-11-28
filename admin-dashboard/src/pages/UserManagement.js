@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TextField, Button, Container, Typography, Box, List, ListItem, ListItemText, IconButton, Select, MenuItem, Snackbar, Alert } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PeopleIcon from '@mui/icons-material/People';
+
 import { Card, CardBody, CardTitle } from 'reactstrap';
 import api from "../axiosConfig";
 
@@ -50,6 +52,7 @@ function UserManagement() {
       await api.post('http://127.0.0.1:8080/api/v1/register', {
         username: newUser.firstName,
         password: newUser.password,
+        email: newUser.email,
         role_id: roleIds[newUser.role] || 4
       });
       showNotification("User registered successfully", "success");
@@ -128,9 +131,87 @@ function UserManagement() {
   return (
     <Box sx={commonBackgroundStyle}>
       <Container component="main" maxWidth="md">
-        <Typography variant="h4" align="center" sx={{ marginBottom: '20px', color: '#6A1B9A', fontFamily: 'Poppins, sans-serif', fontWeight: 'bold' }}>
-          User Management
-        </Typography>
+        {/* SEYRA Başlık ve Logo */}
+    <Box
+      sx={{
+        display: 'flex', // Elemanları yan yana düzenler
+        flexDirection: 'column', // Alt alta sıralamak için
+        alignItems: 'center', // Yatayda ortalar
+        justifyContent: 'center', // Dikeyde ortalar
+        marginTop: '-220px', // Üst boşluk
+        marginBottom: '100px', // Alt boşluk
+      }}
+    >
+      <img
+        src={`${process.env.PUBLIC_URL}/seyra-logo.png`}
+        alt="Seyra Logo"
+        style={{
+          width: '100px', // Logonun boyutu
+          height: '100px',
+          borderRadius: '50%', // Oval görünüm
+          marginBottom: '16px', // Logo ile yazı arasında boşluk
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+        }}
+      />
+      <Typography
+        component="h1"
+        variant="h3"
+        sx={{
+          fontWeight: 'bold',
+          fontSize: '2.5rem',
+          color: '#ffffff',
+          fontFamily: "'Poppins', sans-serif",
+          textShadow: '2px 2px 6px rgba(0, 0, 0, 0.3)',
+          textAlign: 'center', // Yazıyı ortalar
+        }}
+      >
+        SEYRA
+      </Typography>
+
+      {/* Alt Başlık */}
+      <Typography
+        component="h2"
+        variant="subtitle1"
+        sx={{
+          fontWeight: '400',
+          color: '#F3F4F6',
+          fontFamily: "'Roboto', sans-serif",
+          textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)',
+          textAlign: 'center', // Yazıyı ortalar
+          marginTop: '8px', // Üst boşluk
+        }}
+      >
+        Sunucu Yönetim Sistemi
+      </Typography>
+    </Box>
+            {/* User Management Başlık ve Alt Başlık */}
+        <Box sx={{ textAlign: 'center', marginBottom: '20px' }}>
+          <Typography
+            variant="h4"
+            sx={{
+              color: '#6A1B9A',
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textShadow: '2px 2px 6px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <PeopleIcon sx={{ fontSize: '30px', marginRight: '8px' }} />
+            User Management
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontSize: '1rem',
+              color: '#333',
+              fontFamily: "'Roboto', sans-serif",
+            }}
+          >
+            Manage users, view details, and assign roles easily.
+          </Typography>
+        </Box>
 
         <Button variant="contained" color="primary" onClick={handleAddUserClick} sx={{ marginBottom: '20px' }}>
           Add User

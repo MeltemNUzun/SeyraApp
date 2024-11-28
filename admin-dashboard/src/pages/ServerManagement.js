@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import DnsIcon from '@mui/icons-material/Dns';
 import { Card, CardBody, CardTitle } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
 import api from '../axiosConfig';
@@ -143,18 +144,88 @@ function ServerManagement() {
   return (
     <Box sx={commonBackgroundStyle}>
       <Container component="main" maxWidth="md">
-        <Typography
-          variant="h4"
-          align="center"
-          sx={{
-            marginBottom: '20px',
-            color: '#6A1B9A',
-            fontFamily: 'Poppins, sans-serif',
-            fontWeight: 'bold',
-          }}
-        >
-          Sunucu Yönetimi
-        </Typography>
+       {/* SEYRA Başlık ve Logo */}
+    <Box
+      sx={{
+        display: 'flex', // Elemanları yan yana düzenler
+        flexDirection: 'column', // Alt alta sıralamak için
+        alignItems: 'center', // Yatayda ortalar
+        justifyContent: 'center', // Dikeyde ortalar
+        marginTop: '-220px', // Üst boşluk
+        marginBottom: '100px', // Alt boşluk
+      }}
+    >
+      <img
+        src={`${process.env.PUBLIC_URL}/seyra-logo.png`}
+        alt="Seyra Logo"
+        style={{
+          width: '100px', // Logonun boyutu
+          height: '100px',
+          borderRadius: '50%', // Oval görünüm
+          marginBottom: '16px', // Logo ile yazı arasında boşluk
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+        }}
+      />
+      <Typography
+        component="h1"
+        variant="h3"
+        sx={{
+          fontWeight: 'bold',
+          fontSize: '2.5rem',
+          color: '#ffffff',
+          fontFamily: "'Poppins', sans-serif",
+          textShadow: '2px 2px 6px rgba(0, 0, 0, 0.3)',
+          textAlign: 'center', // Yazıyı ortalar
+        }}
+      >
+        SEYRA
+      </Typography>
+
+      {/* Alt Başlık */}
+      <Typography
+        component="h2"
+        variant="subtitle1"
+        sx={{
+          fontWeight: '400',
+          color: '#F3F4F6',
+          fontFamily: "'Roboto', sans-serif",
+          textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)',
+          textAlign: 'center', // Yazıyı ortalar
+          marginTop: '8px', // Üst boşluk
+        }}
+      >
+        Sunucu Yönetim Sistemi
+      </Typography>
+    </Box>
+   
+            {/* Server Management Başlık ve Alt Başlık */}
+        <Box sx={{ textAlign: 'center', marginBottom: '20px' }}>
+          <Typography
+            variant="h4"
+            sx={{
+              color: '#6A1B9A',
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textShadow: '2px 2px 6px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+             <DnsIcon sx={{ fontSize: '30px', marginRight: '8px' }} />
+            Server Management
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontSize: '1rem',
+              color: '#333',
+              fontFamily: "'Roboto', sans-serif",
+            }}
+          >
+            Manage servers, view details, and assign servers easily.
+          </Typography>
+        </Box>
 
         <Button
           variant="contained"
