@@ -15,6 +15,21 @@ import (
 
 var jwtSecret = []byte("your_secret_key")
 
+// getRoleIdFromContext extracts the role_id from the context securely.
+func getRoleIdFromContext(c *gin.Context) (int, error) {
+	roleIdValue, exists := c.Get("role_id")
+	if !exists {
+		return 0, fmt.Errorf("role_id not found in context")
+	}
+
+	roleId, ok := roleIdValue.(int)
+	if !ok {
+		return 0, fmt.Errorf("role_id is not of type int")
+	}
+
+	return roleId, nil
+}
+
 // Login handles the login request by authenticating the user and returning a token.
 func Login(c *gin.Context) {
 	var req struct {
@@ -73,9 +88,9 @@ func Register(c *gin.Context) {
 	}
 
 	// Check if the user is authorized to register a new user
-	userRoleId, exists := c.Get("role_id")
-	if !exists {
-		logger.Logger().Error("User role not found in token")
+	userRoleId, err := getRoleIdFromContext(c)
+	if err != nil {
+		logger.Logger().Error("User role not found in token", zap.Error(err))
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
@@ -94,7 +109,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	err := services.RegisterUser(req.Username, req.Password, req.RoleId, req.Email)
+	err = services.RegisterUser(req.Username, req.Password, req.RoleId, req.Email)
 	if err != nil {
 		logger.Logger().Error("Error registering user", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error registering user"})
@@ -120,9 +135,9 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	// Check if the user is authorized to delete a user
-	userRoleId, exists := c.Get("role_id")
-	if !exists {
-		logger.Logger().Error("User role not found in token")
+	userRoleId, err := getRoleIdFromContext(c)
+	if err != nil {
+		logger.Logger().Error("User role not found in token", zap.Error(err))
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
@@ -148,14 +163,14 @@ func DeleteUser(c *gin.Context) {
 // Users handles the request to get all users.
 func Users(c *gin.Context) {
 	// Check if the user is authorized to view all users
-	userRoleId, exists := c.Get("role_id")
-	if !exists {
-		logger.Logger().Error("User role not found in token")
+	userRoleId, err := getRoleIdFromContext(c)
+	if err != nil {
+		logger.Logger().Error("User role not found in token", zap.Error(err))
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 
-	// Only admin users can delete users
+	// Only admin users can view all users
 	if userRoleId != 1 {
 		logger.Logger().Error("Unauthorized user attempting to view all users")
 		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to perform this action"})
@@ -187,9 +202,9 @@ func UpdateUserRole(c *gin.Context) {
 	}
 
 	// Check if the user is authorized to update the role of a user
-	userRoleId, exists := c.Get("role_id")
-	if !exists {
-		logger.Logger().Error("User role not found in token")
+	userRoleId, err := getRoleIdFromContext(c)
+	if err != nil {
+		logger.Logger().Error("User role not found in token", zap.Error(err))
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
@@ -201,7 +216,7 @@ func UpdateUserRole(c *gin.Context) {
 		return
 	}
 
-	err := services.UpdateUserRole(req.UserId, req.RoleId)
+	err = services.UpdateUserRole(req.UserId, req.RoleId)
 	if err != nil {
 		logger.Logger().Error("Error updating user role", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating user role"})
@@ -262,6 +277,7 @@ func ResetPasswordHandler(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 	}
 }
+
 func ForgotPasswordHandler(c *gin.Context) {
 	var req struct {
 		Email string `json:"email"`
@@ -285,7 +301,7 @@ func ForgotPasswordHandler(c *gin.Context) {
 		"userID": userID,
 		"exp":    time.Now().Add(15 * time.Minute).Unix(),
 	})
-	tokenString, _ := token.SignedString([]byte("your_secret_key"))
+	tokenString, _ := token.SignedString(jwtSecret)
 
 	// Send the reset email (email sending logic should be added here)
 	logger.Logger().Info("Password reset link sent", zap.String("email", req.Email))
