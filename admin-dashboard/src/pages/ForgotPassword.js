@@ -2,16 +2,23 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Paper, Avatar, Snackbar, Alert } from '@mui/material';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
   const navigate = useNavigate();
 
-  const handleForgotPassword = (e) => {
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
-    // Backend işlemleri daha sonra eklenecek
-    showNotification(`Şifre sıfırlama bağlantısı ${email} adresine gönderildi`, 'success');
+    try {
+      // Backend API çağrısı
+      await axios.post('http://localhost:8080/api/v1/forgot-password', { email });
+      showNotification(`Şifre sıfırlama bağlantısı ${email} adresine gönderildi.`, 'success');
+    } catch (error) {
+      console.error('Şifre sıfırlama hatası:', error);
+      showNotification('E-posta doğrulanamadı. Lütfen tekrar deneyin.', 'error');
+    }
   };
 
   const handleBackToLogin = () => {
@@ -88,7 +95,6 @@ function ForgotPassword() {
             </Typography>
           </Box>
         </Box>
-        
 
         <Paper
           elevation={8}

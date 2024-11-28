@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import UserManagement from './pages/UserManagement';
 import ServerManagement from './pages/ServerManagement';
 import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword'; // Yeni sayfayı içe aktardık
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ServerLogs from './pages/ServerLogs';
 
@@ -74,6 +75,19 @@ function App() {
                 <title>SEYRA - Şifremi Unuttum</title>
               </Helmet>
               <ForgotPassword />
+            </>
+          }
+        />
+
+        {/* Şifre Sıfırla */}
+        <Route
+          path="/reset-password/:token"
+          element={
+            <>
+              <Helmet>
+                <title>SEYRA - Şifreyi Sıfırla</title>
+              </Helmet>
+              <ResetPassword />
             </>
           }
         />
