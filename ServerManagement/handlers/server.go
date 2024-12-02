@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"server-management/logger"
 	"server-management/models"
@@ -128,7 +129,7 @@ func GetLogsByServerId(c *gin.Context) {
 		return
 	}
 
-	//logs, err := services.GetLogsByServerId(serverId)
+	logs, err := services.GetLogsByServerId(serverId)
 	if err != nil {
 		logger.Logger().Error("Error fetching logs", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching logs"})
@@ -136,5 +137,6 @@ func GetLogsByServerId(c *gin.Context) {
 	}
 
 	logger.Logger().Info("Logs fetched successfully")
-	//c.JSON(http.StatusOK, logs)
+	fmt.Println("logs:", logs)
+	c.JSON(http.StatusOK, logs)
 }

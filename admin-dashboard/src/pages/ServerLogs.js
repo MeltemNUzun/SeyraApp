@@ -53,70 +53,70 @@ function ServerLogs() {
   };
 
   // Filtrelenen loglar
-  const filteredLogs = logs.filter((log) =>
-    log.message.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredLogs = (logs || []).filter((log) =>
+      log.message.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <Box sx={commonBackgroundStyle}>
-      <Container component="main" maxWidth="lg">
-        <Typography
-          variant="h4"
-          align="center"
-          sx={{
-            marginBottom: '20px',
-            color: '#6A1B9A',
-            fontFamily: 'Poppins, sans-serif',
-            fontWeight: 'bold',
-          }}
-        >
-          Server Logs
-        </Typography>
-
-        <TextField
-          label="Search Logs"
-          variant="outlined"
-          fullWidth
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ marginBottom: '20px', backgroundColor: '#ffffff' }}
-        />
-
-        <Grid container spacing={3}>
-          {filteredLogs.map((log, index) => (
-            <Grid item xs={12} key={index}>
-              <Paper sx={{ padding: '20px', backgroundColor: '#ffffff', borderRadius: '10px' }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                  Log Type: {log.logTypeId}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Timestamp: {log.timestamp}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Message: {log.message}
-                </Typography>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Bildirim Alanı */}
-        <Snackbar
-          open={notification.open}
-          autoHideDuration={4000}
-          onClose={handleNotificationClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert
-            onClose={handleNotificationClose}
-            severity={notification.severity}
-            sx={{ width: '100%' }}
+      <Box sx={commonBackgroundStyle}>
+        <Container component="main" maxWidth="lg">
+          <Typography
+              variant="h4"
+              align="center"
+              sx={{
+                marginBottom: '20px',
+                color: '#6A1B9A',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 'bold',
+              }}
           >
-            {notification.message}
-          </Alert>
-        </Snackbar>
-      </Container>
-    </Box>
+            Server Logs
+          </Typography>
+
+          <TextField
+              label="Search Logs"
+              variant="outlined"
+              fullWidth
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{ marginBottom: '20px', backgroundColor: '#ffffff' }}
+          />
+
+          <Grid container spacing={3}>
+            {filteredLogs.map((log, index) => (
+                <Grid item xs={12} key={index}>
+                  <Paper sx={{ padding: '20px', backgroundColor: '#ffffff', borderRadius: '10px' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                      Log Type: {log.logTypeId}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Timestamp: {log.timestamp}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Message: {log.message}
+                    </Typography>
+                  </Paper>
+                </Grid>
+            ))}
+          </Grid>
+
+          {/* Bildirim Alanı */}
+          <Snackbar
+              open={notification.open}
+              autoHideDuration={4000}
+              onClose={handleNotificationClose}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          >
+            <Alert
+                onClose={handleNotificationClose}
+                severity={notification.severity}
+                sx={{ width: '100%' }}
+            >
+              {notification.message}
+            </Alert>
+          </Snackbar>
+        </Container>
+      </Box>
   );
 }
 
