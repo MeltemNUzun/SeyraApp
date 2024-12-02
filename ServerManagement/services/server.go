@@ -39,11 +39,15 @@ func DeleteServer(serverID int) error {
 
 }
 
-/*func GetLogsByServerId(serverID int) ([]models.Log, error) {
+// GetLogsByServerId sunucu ID'sine göre logları çeker
+func GetLogsByServerId(serverID int) ([]models.Log, error) {
+	// Veritabanından logları al
 	logs, err := repository.GetLogsByServerId(serverID)
 	if err != nil {
-		logger.Logger().Error("Error fetching logs", zap.Error(err))
+		// Hata durumunda loglama yap ve hatayı döndür
+		logger.Logger().Error("Loglar çekilirken bir hata oluştu", zap.Error(err))
 		return nil, err
 	}
+	// Logları döndür
 	return logs, nil
-}*/
+}

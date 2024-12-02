@@ -91,7 +91,43 @@ func DeleteServerById(serverId int) error {
 	return nil
 }
 
-/*func GetLogsByServerId(serverId int) ([]models.Log, error) {
+// GetLogsByServerId sunucu ID'sine göre logları getirir
+func GetLogsByServerId(serverId int) ([]models.Log, error) {
+	var logs []models.Log
+	var rows *sql.Rows
+	var err error
 
-	return nil, nil
-}*/
+	// Veritabanı sorgusu
+	rows, err = database.DB.Query(
+		"SELECT LogId, LogTypeId, Timestamp, Message, ServerId FROM dbo.Logs WHERE ServerId = @ServerId",
+		sql.Named("ServerId", serverId),
+	)
+	if err != nil {
+		logger.Logger().Error("Error fetching logs", zap.Error(err))
+		return nil, err
+	}
+	defer rows.Close() // Açık bağlantıları kapatmak için eklenmiştir
+
+	// Veritabanı sonuçlarını okuma
+	for rows.Next() {
+		var log models.Log
+
+		// Satırı okuma ve modele yerleştirme
+		err = rows.Scan(&log.LogId, &log.LogTypeId, &log.Timestamp, &log.Message, &log.ServerId)
+		if err != nil {
+			logger.Logger().Error("Error scanning log", zap.Error(err))
+			return nil, err
+		}
+
+		// Log'u listeye ekle
+		logs = append(logs, log)
+	}
+
+	// Herhangi bir hata oluştuysa kontrol
+	if err = rows.Err(); err != nil {
+		logger.Logger().Error("Error after fetching logs", zap.Error(err))
+		return nil, err
+	}
+
+	return logs, nil // Log listesi döndür
+}

@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
-import { Container, Typography, Box, TextField, Grid, Paper } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Typography,
+  Box,
+  TextField,
+  Grid,
+  Paper,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import { useParams } from 'react-router-dom';
+import api from '../axiosConfig';
 
-// Ortak arka plan stilini tanımlayın
+// Ortak arka plan stili
 const commonBackgroundStyle = {
   display: 'flex',
   alignItems: 'center',
@@ -11,20 +22,54 @@ const commonBackgroundStyle = {
 };
 
 function ServerLogs() {
+  const { serverId } = useParams(); // URL'den sunucu ID'sini al
+  const [logs, setLogs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const logs = [
-    { logTypeId: 'Error', timestamp: '2024-10-30 14:32', message: 'Server failed to respond.' },
-    { logTypeId: 'Warning', timestamp: '2024-10-30 15:45', message: 'High memory usage detected.' },
-  ];
+  const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
-  const filteredLogs = logs.filter(log =>
+  // Logları getirme
+  useEffect(() => {
+    fetchLogs();
+  }, [serverId]);
+
+  const fetchLogs = async () => {
+    try {
+      const response = await api.get(`http://127.0.0.1:8080/api/v1/logs/${serverId}`);
+      setLogs(response.data);
+    } catch (error) {
+      console.error('Loglar alınırken hata oluştu:', error);
+      showNotification('Loglar alınırken hata oluştu.', 'error');
+    }
+  };
+
+  // Bildirimleri gösterme
+  const showNotification = (message, severity) => {
+    setNotification({ open: true, message, severity });
+  };
+
+  // Bildirim kapatma
+  const handleNotificationClose = () => {
+    setNotification({ ...notification, open: false });
+  };
+
+  // Filtrelenen loglar
+  const filteredLogs = logs.filter((log) =>
     log.message.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <Box sx={commonBackgroundStyle}>
       <Container component="main" maxWidth="lg">
-        <Typography variant="h4" align="center" sx={{ marginBottom: '20px', color: '#6A1B9A', fontFamily: 'Poppins, sans-serif', fontWeight: 'bold' }}>
+        <Typography
+          variant="h4"
+          align="center"
+          sx={{
+            marginBottom: '20px',
+            color: '#6A1B9A',
+            fontFamily: 'Poppins, sans-serif',
+            fontWeight: 'bold',
+          }}
+        >
           Server Logs
         </Typography>
 
@@ -54,6 +99,22 @@ function ServerLogs() {
             </Grid>
           ))}
         </Grid>
+
+        {/* Bildirim Alanı */}
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={4000}
+          onClose={handleNotificationClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert
+            onClose={handleNotificationClose}
+            severity={notification.severity}
+            sx={{ width: '100%' }}
+          >
+            {notification.message}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );
