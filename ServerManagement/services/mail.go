@@ -8,9 +8,9 @@ import (
 var mailConfig = MailConfig{
 	SMTPHost: "smtp.gmail.com", // SMTP sunucusu
 	SMTPPort: "587",            // SMTP portu (TLS için genellikle 587 kullanılır)
-	Username: "gulermelihemre@gmail.com",
-	Password: "",
-	From:     "gulermelihemre@gmail.com",
+	Username: "nisaauzn@gmail.com",
+	Password: "ekpl xlib ljju xzwc",
+	From:     "nisaauzn@gmail.com",
 }
 var M = NewMailService(mailConfig)
 
