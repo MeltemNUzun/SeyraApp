@@ -11,6 +11,7 @@ html, body {
   background: linear-gradient(135deg, #D16BA5, #86A8E7, #5FFBF1); /* Gradient arka plan */
   background-attachment: fixed; /* Arka plan sabit kalsın */
   background-size: cover; /* Tam ekranı kaplayacak şekilde ölçekle */
+  box-sizing: border-box; /* Kenarlıkları dahil et */
 }
 
 
@@ -38,9 +39,8 @@ a:hover {
   text-decoration: underline;
 }
 #root {
-  min-height: 100%; /* İçeriğin ekranın tamamını kaplamasını sağla */
+  min-height: 100vh; /* İçeriğin ekranın tamamını kaplamasını sağla */
   display: flex;
   flex-direction: column; /* İçerikleri dikeyde alt alta yerleştir */
-  justify-content: flex-start; /* Üstten başlasın */
-  box-sizing: border-box; /* Taşmaları önlemek için kutu boyutlaması */
+  
 }

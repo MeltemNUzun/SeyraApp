@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
   TextField,
   Button,
@@ -22,19 +21,9 @@ import { Card, CardBody, CardTitle } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
 import api from '../axiosConfig';
 
-// Ortak arka plan stili
-const commonBackgroundStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '100vh',
-  background: 'linear-gradient(135deg, #D16BA5, #86A8E7, #5FFBF1)',
-};
-
 const serverTypes = ['Web Servers', 'Mail Servers', 'Database Servers'];
 const serverTypeIds = { 'Web Servers': 2, 'Mail Servers': 3, 'Database Servers': 4 };
 
-// Vendor seçenekleri
 const vendorOptions = {
   'Web Servers': ['Apache', 'Nginx', 'IIS'],
   'Mail Servers': ['Postfix', 'Exim', 'Microsoft Exchange'],
@@ -53,9 +42,8 @@ function ServerManagement() {
     password: '',
   });
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
-  const navigate = useNavigate(); // Sayfa yönlendirmesi için
+  const navigate = useNavigate();
 
-  // Sunucuları getirme
   useEffect(() => {
     fetchServers();
   }, []);
@@ -70,7 +58,6 @@ function ServerManagement() {
     }
   };
 
-  // Sunucu ekleme
   const handleSaveServer = async () => {
     try {
       await api.post('http://127.0.0.1:8080/api/v1/add-server', {
@@ -82,7 +69,7 @@ function ServerManagement() {
         server_password: newServer.password,
       });
       showNotification('Sunucu başarıyla eklendi', 'success');
-      fetchServers(); // Sunucu listesini güncelle
+      fetchServers();
       setNewServer({ name: '', type: '', vendor: '', ip: '', username: '', password: '' });
       setIsAddingServer(false);
     } catch (error) {
@@ -91,50 +78,43 @@ function ServerManagement() {
     }
   };
 
-  // Sunucu silme
   const handleDeleteServer = async (serverId) => {
     try {
       await api.delete(`http://127.0.0.1:8080/api/v1/delete-server/${serverId}`);
       showNotification('Sunucu başarıyla silindi', 'success');
-      fetchServers(); // Sunucu listesini güncelle
+      fetchServers();
     } catch (error) {
       console.error('Sunucu silinirken hata oluştu:', error);
       showNotification('Sunucu silmeye yetkiniz yok!', 'error');
     }
   };
 
-  // Logları görüntüleme
   const handleViewLogs = (serverId) => {
-    navigate(`/server-logs/${serverId}`); // Sunucu loglarına yönlendirme
+    navigate(`/server-logs/${serverId}`);
   };
 
-  // Sunucu ekleme butonu yönetimi
   const handleAddServerClick = () => {
     setIsAddingServer(true);
   };
 
-  // Giriş alanı değişikliklerini yönetme
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewServer((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  // Bildirimleri gösterme
   const showNotification = (message, severity) => {
     setNotification({ open: true, message, severity });
   };
 
-  // Bildirim kapatma
   const handleNotificationClose = () => {
     setNotification({ ...notification, open: false });
   };
 
-  // Çıkış yapma
   const handleLogout = async () => {
     try {
       await api.post('http://127.0.0.1:8080/api/v1/logout');
       showNotification('Başarıyla çıkış yapıldı', 'success');
-      navigate('/login'); // Login sayfasına yönlendir
+      navigate('/login');
     } catch (error) {
       console.error('Çıkış yapılırken hata oluştu:', error);
       showNotification('Çıkış yapılamadı.', 'error');
@@ -142,108 +122,65 @@ function ServerManagement() {
   };
 
   return (
-    <Box sx={commonBackgroundStyle}>
-      <Container component="main" maxWidth="md">
-       {/* SEYRA Başlık ve Logo */}
-    <Box
-      sx={{
-        display: 'flex', // Elemanları yan yana düzenler
-        flexDirection: 'column', // Alt alta sıralamak için
-        alignItems: 'center', // Yatayda ortalar
-        justifyContent: 'center', // Dikeyde ortalar
-        marginTop: '-220px', // Üst boşluk
-        marginBottom: '100px', // Alt boşluk
-      }}
-    >
-      <img
-        src={`${process.env.PUBLIC_URL}/seyra-logo.png`}
-        alt="Seyra Logo"
-        style={{
-          width: '100px', // Logonun boyutu
-          height: '100px',
-          borderRadius: '50%', // Oval görünüm
-          marginBottom: '16px', // Logo ile yazı arasında boşluk
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-        }}
-      />
-      <Typography
-        component="h1"
-        variant="h3"
+    <Box sx={{ margin: 0, padding: 0, minHeight: '100vh', overflowY: 'auto', position: 'relative' }}>
+      {/* Sağ üst köşede sabitlenen Sunucu Ekle ve Çıkış Yap butonları */}
+      <Box
         sx={{
-          fontWeight: 'bold',
-          fontSize: '2.5rem',
-          color: '#ffffff',
-          fontFamily: "'Poppins', sans-serif",
-          textShadow: '2px 2px 6px rgba(0, 0, 0, 0.3)',
-          textAlign: 'center', // Yazıyı ortalar
+          position: 'fixed',
+          top: '160px',
+          right: '25px',
+          display: 'flex',
+          gap: 2,
+          zIndex: 1000,
         }}
       >
-        SEYRA
-      </Typography>
-
-      {/* Alt Başlık */}
-      <Typography
-        component="h2"
-        variant="subtitle1"
-        sx={{
-          fontWeight: '400',
-          color: '#F3F4F6',
-          fontFamily: "'Roboto', sans-serif",
-          textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)',
-          textAlign: 'center', // Yazıyı ortalar
-          marginTop: '8px', // Üst boşluk
-        }}
-      >
-        Sunucu Yönetim Sistemi
-      </Typography>
-    </Box>
-   
-            {/* Server Management Başlık ve Alt Başlık */}
-        <Box sx={{ textAlign: 'center', marginBottom: '20px' }}>
-          <Typography
-            variant="h4"
-            sx={{
-              color: '#6A1B9A',
-              fontFamily: "'Poppins', sans-serif",
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textShadow: '2px 2px 6px rgba(0, 0, 0, 0.3)',
-            }}
-          >
-             <DnsIcon sx={{ fontSize: '30px', marginRight: '8px' }} />
-            Server Management
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontSize: '1rem',
-              color: '#333',
-              fontFamily: "'Roboto', sans-serif",
-            }}
-          >
-            Manage servers, view details, and assign servers easily.
-          </Typography>
-        </Box>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleAddServerClick}
-          sx={{ marginBottom: '20px' }}
-        >
+        <Button variant="contained" color="primary" onClick={handleAddServerClick}>
           Sunucu Ekle
         </Button>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleLogout}
-          sx={{ marginBottom: '20px', marginLeft: '10px' }}
-        >
+        <Button variant="contained" color="error" onClick={handleLogout}>
           Çıkış Yap
         </Button>
+      </Box>
 
+      {/* Sabitlenen Server Management başlıkları */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: '160px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          textAlign: 'center',
+          zIndex: 1000,
+         
+          padding: '10px',
+          borderRadius: '18px',
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            color: '#6A1B9A',
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: 'bold',
+            textShadow: '2px 2px 6px rgba(0, 0, 0, 0.3)',
+          }}
+        >
+          <DnsIcon sx={{ fontSize: '30px', marginRight: '8px' }} />
+          Server Management
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontSize: '1rem',
+            color: '#333',
+            fontFamily: "'Roboto', sans-serif",
+          }}
+        >
+          Manage servers, view details, and assign servers easily.
+        </Typography>
+      </Box>
+
+      <Container maxWidth="md" sx={{ marginTop: '150px' }}>
         {isAddingServer && (
           <Card
             className="mt-4"
@@ -342,36 +279,35 @@ function ServerManagement() {
         )}
 
         <List>
-        {servers && servers.map((server) => (
-
-            <ListItem
-              key={server.server_id}
-              sx={{
-                marginBottom: '20px',
-                backgroundColor: '#ffffff',
-                borderRadius: '10px',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-              }}
-            >
-              <ListItemText
-                primary={`${server.server_name} (Tip ID: ${server.server_type_id})`}
-                secondary={`IP Adresi: ${server.ip_address}`}
-                />
-              <IconButton edge="end" aria-label="view" onClick={() => handleViewLogs(server.server_id)}>
-                <VisibilityIcon color="primary" />
-              </IconButton>
-              <IconButton
-                edge="end"
-                aria-label="delete"
-                onClick={() => handleDeleteServer(server.server_id)}
+          {servers &&
+            servers.map((server) => (
+              <ListItem
+                key={server.server_id}
+                sx={{
+                  marginBottom: '20px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                }}
               >
-                <DeleteIcon color="error" />
-              </IconButton>
-            </ListItem>
-          ))}
+                <ListItemText
+                  primary={`${server.server_name} (Tip ID: ${server.server_type_id})`}
+                  secondary={`IP Adresi: ${server.ip_address}`}
+                />
+                <IconButton edge="end" aria-label="view" onClick={() => handleViewLogs(server.server_id)}>
+                  <VisibilityIcon color="primary" />
+                </IconButton>
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={() => handleDeleteServer(server.server_id)}
+                >
+                  <DeleteIcon color="error" />
+                </IconButton>
+              </ListItem>
+            ))}
         </List>
 
-        {/* Bildirim Alanı */}
         <Snackbar
           open={notification.open}
           autoHideDuration={4000}

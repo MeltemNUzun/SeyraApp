@@ -6,15 +6,16 @@ import Home from './pages/Home';
 import UserManagement from './pages/UserManagement';
 import ServerManagement from './pages/ServerManagement';
 import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword'; // Yeni sayfayı içe aktardık
-import 'bootstrap/dist/css/bootstrap.min.css';
+import ResetPassword from './pages/ResetPassword';
+import Layout from './components/Layout'; // Layout bileşenini import ettik
 import ServerLogs from './pages/ServerLogs';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Login Sayfası */}
+        {/* Login Sayfası (Sabit layout olmadan gösterilecek) */}
         <Route
           path="/"
           element={
@@ -26,84 +27,87 @@ function App() {
             </>
           }
         />
-        
-        {/* Ana Sayfa */}
-        <Route
-          path="/home"
-          element={
-            <>
-              <Helmet>
-                <title>SEYRA - Ana Sayfa</title>
-              </Helmet>
-              <Home />
-            </>
-          }
-        />
 
-        {/* Kullanıcı Yönetimi */}
-        <Route
-          path="/user-management"
-          element={
-            <>
-              <Helmet>
-                <title>SEYRA - Kullanıcı Yönetimi</title>
-              </Helmet>
-              <UserManagement />
-            </>
-          }
-        />
+        {/* Layout kullanılarak sabit içerik ve sayfalar */}
+        <Route element={<Layout />}>
+          {/* Ana Sayfa */}
+          <Route
+            path="/home"
+            element={
+              <>
+                <Helmet>
+                  <title>SEYRA - Ana Sayfa</title>
+                </Helmet>
+                <Home />
+              </>
+            }
+          />
 
-        {/* Sunucu Yönetimi */}
-        <Route
-          path="/server-management"
-          element={
-            <>
-              <Helmet>
-                <title>SEYRA - Sunucu Yönetimi</title>
-              </Helmet>
-              <ServerManagement />
-            </>
-          }
-        />
+          {/* Kullanıcı Yönetimi */}
+          <Route
+            path="/user-management"
+            element={
+              <>
+                <Helmet>
+                  <title>SEYRA - Kullanıcı Yönetimi</title>
+                </Helmet>
+                <UserManagement />
+              </>
+            }
+          />
 
-        {/* Şifremi Unuttum */}
-        <Route
-          path="/forgot-password"
-          element={
-            <>
-              <Helmet>
-                <title>SEYRA - Şifremi Unuttum</title>
-              </Helmet>
-              <ForgotPassword />
-            </>
-          }
-        />
+          {/* Sunucu Yönetimi */}
+          <Route
+            path="/server-management"
+            element={
+              <>
+                <Helmet>
+                  <title>SEYRA - Sunucu Yönetimi</title>
+                </Helmet>
+                <ServerManagement />
+              </>
+            }
+          />
 
-        {/* Şifre Sıfırla */}
-        <Route
-          path="/reset-password/:token"
-          element={
-            <>
-              <Helmet>
-                <title>SEYRA - Şifreyi Sıfırla</title>
-              </Helmet>
-              <ResetPassword />
-            </>
-          }
-        />
+          {/* Şifremi Unuttum */}
+          <Route
+            path="/forgot-password"
+            element={
+              <>
+                <Helmet>
+                  <title>SEYRA - Şifremi Unuttum</title>
+                </Helmet>
+                <ForgotPassword />
+              </>
+            }
+          />
 
-        {/* Server Logs */}
-        <Route
-          path="/server-logs/:serverId"
-          element={
-            <>
-              <Helmet>
-                <title>SEYRA - Sunucu Logları</title>
-              </Helmet>
-              <ServerLogs />
-            </>
-          }
-        />
+          {/* Şifre Sıfırla */}
+          <Route
+            path="/reset-password/:token"
+            element={
+              <>
+                <Helmet>
+                  <title>SEYRA - Şifreyi Sıfırla</title>
+                </Helmet>
+                <ResetPassword />
+              </>
+            }
+          />
+
+          {/* Server Logs */}
+          <Route
+            path="/server-logs/:serverId"
+            element={
+              <>
+                <Helmet>
+                  <title>SEYRA - Sunucu Logları</title>
+                </Helmet>
+                <ServerLogs />
+              </>
+            }
+          />
+        </Route>
 
         {/* Bilinmeyen Rotaya Yönlendirme */}
         <Route path="*" element={<Navigate to="/" />} />

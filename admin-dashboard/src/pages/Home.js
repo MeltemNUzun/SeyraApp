@@ -4,22 +4,12 @@ import PersonIcon from '@mui/icons-material/Person';
 import StorageIcon from '@mui/icons-material/Storage';
 import api from "../axiosConfig";
 
-// Ortak arka plan stilini tanımlayın
-const commonBackgroundStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '100vh',
-  background: 'linear-gradient(135deg, #D16BA5, #86A8E7, #5FFBF1)',
-};
-
 function Home() {
-  // Çıkış işlemi
   const handleLogout = async () => {
     try {
       const response = await api.post('http://127.0.0.1:8080/api/v1/logout');
-      alert(response.data.message); // "Logout successful" mesajını gösterir
-      window.location.href = '/login'; // Giriş sayfasına yönlendirme
+      alert(response.data.message);
+      window.location.href = '/login';
     } catch (error) {
       console.error("Çıkış yapılırken hata oluştu:", error);
       alert("Çıkış yapılamadı.");
@@ -27,75 +17,52 @@ function Home() {
   };
 
   return (
-    <Box sx={commonBackgroundStyle}>
-      <Container component="main" maxWidth="md">
-        {/* SEYRA Başlığı ve Logo */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '70px', // Yukarı taşımak için azaltıldı
-          }}
-        >
-          {/* Oval Logo */}
-          <img
-            src={`${process.env.PUBLIC_URL}/seyra-logo.png`}
-            alt="Seyra Logo"
-            style={{
-              width: '120px', // Logonun genişliği
-              height: '120px', // Logonun yüksekliği
-              borderRadius: '50%', // Oval görünüm
-              marginRight: '15px', // Logo ile "SEYRA" yazısı arasındaki boşluk
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Hafif gölge efekti
-            }}
-          />
-          {/* SEYRA Yazısı */}
-          <Box>
-            <Typography
-              component="h1"
-              variant="h3"
-              sx={{
-                fontWeight: 'bold',
-                color: '#ffffff',
-                fontFamily: "'Poppins', sans-serif",
-                textShadow: '2px 2px 6px rgba(0, 0, 0, 0.3)',
-              }}
-            >
-              SEYRA
-            </Typography>
-            {/* Alt Başlık */}
-            <Typography
-              component="h2"
-              variant="subtitle1"
-              sx={{
-                fontWeight: '400',
-                color: '#F3F4F6',
-                fontFamily: "'Roboto', sans-serif",
-                textShadow: '1px 1px 3px rgba(0, 0, 0, 0.3)',
-              }}
-            >
-              Sunucu Yönetim Sistemi
-            </Typography>
-          </Box>
-        </Box>
+    <>
+      {/* Çıkış Butonu */}
+      <Button
+        variant="contained"
+        color="error"
+        onClick={handleLogout}
+        sx={{
+          position: 'fixed',
+          top: '160px',
+          right: '25px',
+          display: 'flex',
+          padding: '10px 20px',
+          fontWeight: 'bold',
+          borderRadius: '12px',
+        }}
+      >
+        Logout
+      </Button>
 
-        {/* Sayfa Başlığı */}
-<Box textAlign="center" mb={4}>
-  <Typography
-    component="h2"
-    variant="h4"
-    sx={{
-      color: '#ffffff', // Beyaz renk
-      fontWeight: 'bold', // Kalın yazı
-      fontStyle: 'italic', // İtalik yazı
-      fontFamily: "'Poppins', sans-serif", // Modern font
-      textShadow: '2px 2px 6px rgba(0, 0, 0, 0.6)', // Gölgeli efekt
-    }}
-  >
-   Welcome to Seyra
-  </Typography>
-  <Typography
+      <Container
+        component="main"
+        maxWidth="md"
+        sx={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+        }}
+      >
+        {/* Welcome Başlığı ve Alt Başlık */}
+        <Box mb={4}>
+          <Typography
+            component="h2"
+            variant="h4"
+            sx={{
+              color: '#ffffff',
+              fontWeight: 'bold',
+              fontStyle: 'italic',
+              fontFamily: "'Poppins', sans-serif",
+              textShadow: '2px 2px 6px rgba(0, 0, 0, 0.6)',
+            }}
+          >
+            Welcome to Seyra
+          </Typography>
+          <Typography
             variant="body1"
             sx={{
               color: '#F3F4F6',
@@ -105,9 +72,7 @@ function Home() {
           >
             Manage users, servers, and administrative tasks effortlessly.
           </Typography>
-        
-</Box>
-
+        </Box>
 
         {/* Yönetim Kartları */}
         <Grid container spacing={3} justifyContent="center">
@@ -160,20 +125,8 @@ function Home() {
             </Button>
           </Grid>
         </Grid>
-
-        {/* Çıkış Butonu */}
-        <Box display="flex" justifyContent="center" mt={4}>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleLogout}
-            sx={{ padding: '10px 20px', fontWeight: 'bold', borderRadius: '12px' }}
-          >
-            Logout
-          </Button>
-        </Box>
       </Container>
-    </Box>
+    </>
   );
 }
 
