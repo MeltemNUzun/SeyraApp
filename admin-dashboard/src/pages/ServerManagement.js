@@ -13,6 +13,11 @@ import {
   MenuItem,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -42,6 +47,7 @@ function ServerManagement() {
     password: '',
   });
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, serverId: null }); // Onay dialog state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,6 +95,21 @@ function ServerManagement() {
     }
   };
 
+  const handleDeleteClick = (serverId) => {
+    setDeleteDialog({ open: true, serverId }); // Dialog açılır
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteDialog.serverId) {
+      handleDeleteServer(deleteDialog.serverId);
+    }
+    setDeleteDialog({ open: false, serverId: null }); // Dialog kapatılır
+  };
+
+  const handleDialogClose = () => {
+    setDeleteDialog({ open: false, serverId: null }); // Dialog kapatılır
+  };
+
   const handleViewLogs = (serverId) => {
     navigate(`/server-logs/${serverId}`);
   };
@@ -123,6 +144,24 @@ function ServerManagement() {
 
   return (
     <Box sx={{ margin: 0, padding: 0, minHeight: '100vh', overflowY: 'auto', position: 'relative' }}>
+      {/* Silme Onay Dialog */}
+      <Dialog open={deleteDialog.open} onClose={handleDialogClose}>
+        <DialogTitle>Sunucuyu Sil</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bu sunucuyu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            Vazgeç
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Sil
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Sağ üst köşede sabitlenen Sunucu Ekle ve Çıkış Yap butonları */}
       <Box
         sx={{
@@ -151,9 +190,6 @@ function ServerManagement() {
           transform: 'translateX(-50%)',
           textAlign: 'center',
           zIndex: 1000,
-         
-          padding: '10px',
-          borderRadius: '18px',
         }}
       >
         <Typography
@@ -300,7 +336,7 @@ function ServerManagement() {
                 <IconButton
                   edge="end"
                   aria-label="delete"
-                  onClick={() => handleDeleteServer(server.server_id)}
+                  onClick={() => handleDeleteClick(server.server_id)}
                 >
                   <DeleteIcon color="error" />
                 </IconButton>
