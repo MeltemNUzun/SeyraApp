@@ -5,12 +5,11 @@ import (
 	"time"
 )
 
-// Log, sistemdeki bir log kaydını temsil eder
 type Log struct {
-	LogId      int            `json:"log_id"`      // Birincil anahtar
-	LogTypeId  int            `json:"log_type_id"` // LogTypes tablosuna yabancı anahtar
-	Timestamp  time.Time      `json:"timestamp"`   // Logun oluşturulma zamanı
-	Message    string         `json:"message"`     // Log mesajı
-	Importance sql.NullString `json:"Importance"`  // Log Importance
-	ServerId   int            `json:"server_id"`   // Server tablosuna yabancı anahtar
+	LogId      int            `json:"log_id"`
+	LogTypeId  int            `json:"log_type_id"`
+	Timestamp  time.Time      `json:"timestamp"`
+	Message    string         `json:"message"`
+	Importance sql.NullString `json:"importance,omitempty"` // Null ise JSON'da gösterilmez
+	ServerId   int            `json:"server_id"`
 }

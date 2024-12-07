@@ -114,18 +114,14 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 		var importance sql.NullString // importance için sql.NullString kullanımı
 
 		// Satırı okuma ve modele yerleştirme
-		err = rows.Scan(&log.LogId, &log.LogTypeId, &log.Timestamp, &log.Message, &log.Importance, &log.ServerId)
+		err := rows.Scan(&log.LogId, &log.LogTypeId, &log.Timestamp, &log.Message, &importance, &log.ServerId)
 		if err != nil {
 			logger.Logger().Error("Error scanning log", zap.Error(err))
 			return nil, err
 		}
 
-		// importance alanını kontrol etme ve log.Importance'a atama
-		if importance.Valid {
-			log.Importance = importance.String // Eğer geçerli ise, değeri al
-		} else {
-			log.Importance = sql.NullString{Valid: false} // Geçerli değilse, NullString'ı boş olarak ayarla
-		}
+		// importance alanını log.Importance'a doğru şekilde atama
+		log.Importance = importance
 
 		// Log'u listeye ekle
 		logs = append(logs, log)
