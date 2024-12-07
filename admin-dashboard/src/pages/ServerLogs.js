@@ -199,8 +199,13 @@ function ServerLogs() {
 
       {/* Log Listesi */}
       <Box sx={{ height: 400, width: '100%' }}>
-        <DataGrid rows={filteredLogs} columns={columns} pageSize={5} />
-      </Box>
+  <DataGrid
+    rows={filteredLogs}
+    columns={columns}
+    pageSize={5}
+    getRowId={(row) => row.log_id || row.id || Math.random().toString(36).substr(2, 9)}
+  />
+</Box>
 
       {/* Bildirim Alanı */}
       <Snackbar
