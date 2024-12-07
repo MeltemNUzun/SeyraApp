@@ -99,7 +99,7 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 
 	// Veritabanı sorgusu
 	rows, err = database.DB.Query(
-		"SELECT LogId, LogTypeId, Timestamp, Message, ServerId FROM dbo.Logs WHERE ServerId = @ServerId",
+		"SELECT LogId, LogTypeId, Timestamp, Message,Importance, ServerId FROM dbo.Logs WHERE ServerId = @ServerId",
 		sql.Named("ServerId", serverId),
 	)
 	if err != nil {
@@ -113,7 +113,7 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 		var log models.Log
 
 		// Satırı okuma ve modele yerleştirme
-		err = rows.Scan(&log.LogId, &log.LogTypeId, &log.Timestamp, &log.Message, &log.ServerId)
+		err = rows.Scan(&log.LogId, &log.LogTypeId, &log.Timestamp, &log.Message, &log.Importance, &log.ServerId)
 		if err != nil {
 			logger.Logger().Error("Error scanning log", zap.Error(err))
 			return nil, err
