@@ -99,7 +99,7 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 
 	// Veritabanı sorgusu
 	rows, err = database.DB.Query(
-		"SELECT LogId, LogTypeId, Timestamp, Message,Importance, ServerId FROM dbo.Logs WHERE ServerId = @ServerId",
+		"SELECT LogId, LogTypeId, Timestamp, Message, Importance, ServerId FROM dbo.Logs WHERE ServerId = @ServerId",
 		sql.Named("ServerId", serverId),
 	)
 	if err != nil {
@@ -111,12 +111,20 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 	// Veritabanı sonuçlarını okuma
 	for rows.Next() {
 		var log models.Log
+		var importance sql.NullString // importance için sql.NullString kullanımı
 
 		// Satırı okuma ve modele yerleştirme
 		err = rows.Scan(&log.LogId, &log.LogTypeId, &log.Timestamp, &log.Message, &log.Importance, &log.ServerId)
 		if err != nil {
 			logger.Logger().Error("Error scanning log", zap.Error(err))
 			return nil, err
+		}
+
+		// importance alanını kontrol etme ve log.Importance'a atama
+		if importance.Valid {
+			log.Importance = importance.String // Eğer geçerli ise, değeri al
+		} else {
+			log.Importance = sql.NullString{Valid: false} // Geçerli değilse, NullString'ı boş olarak ayarla
 		}
 
 		// Log'u listeye ekle
