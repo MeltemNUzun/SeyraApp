@@ -14,9 +14,9 @@ import (
 func GetUserByUsername(username string) (*models.User, error) {
 	user := &models.User{}
 	err := database.DB.QueryRow(
-		"SELECT UserId, Username, PasswordHash, RoleId FROM dbo.Users WHERE Username = @Username",
+		"SELECT UserId, Username, PasswordHash, RoleId, password_reset_required FROM dbo.Users WHERE Username = @Username",
 		sql.Named("Username", username),
-	).Scan(&user.UserId, &user.Username, &user.PasswordHash, &user.RoleId)
+	).Scan(&user.UserId, &user.Username, &user.PasswordHash, &user.RoleId, &user.PasswordResetRequired)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -49,17 +49,32 @@ func GetUserIdByEmailAddress(email string) (int, error) {
 // AddUser adds a new user to the system.
 func AddUser(username, passwordHash, email string, roleId int) error {
 	_, err := database.DB.Exec(
-		"INSERT INTO dbo.Users (Username, PasswordHash, RoleId, Email) VALUES (@Username, @PasswordHash, @RoleId, @Email)",
+		`INSERT INTO dbo.Users (Username, PasswordHash, RoleId, Email, PasswordResetRequired) 
+		 VALUES (@Username, @PasswordHash, @RoleId, @Email, @PasswordResetRequired)`,
 		sql.Named("Username", username),
 		sql.Named("PasswordHash", passwordHash),
 		sql.Named("RoleId", roleId),
 		sql.Named("Email", email),
+		sql.Named("PasswordResetRequired", true), // Yeni kullanıcılar için zorunlu
 	)
 	if err != nil {
 		logger.Logger().Error("Error adding user", zap.Error(err))
 		return err
 	}
 	return nil
+}
+
+// Update User Password
+func UpdateUserPassword(userId int, hashedPassword string) error {
+	_, err := database.DB.Exec(
+		`UPDATE dbo.Users 
+		 SET PasswordHash = @PasswordHash, PasswordResetRequired = @PasswordResetRequired
+		 WHERE UserId = @UserId`,
+		sql.Named("PasswordHash", hashedPassword),
+		sql.Named("PasswordResetRequired", false), // Şifre değiştirildikten sonra zorunluluk kaldırılıyor
+		sql.Named("UserId", userId),
+	)
+	return err
 }
 
 // DeleteUser deletes a user from the system.
@@ -105,18 +120,6 @@ func UpdateUserRole(userId, roleId int) error {
 	)
 	if err != nil {
 		logger.Logger().Error("Error updating user role", zap.Error(err))
-		return err
-	}
-	return nil
-}
-func UpdateUserPassword(userID int, hash string) error {
-	_, err := database.DB.Exec(
-		"UPDATE dbo.Users SET PasswordHash = @PasswordHash WHERE UserId = @UserId",
-		sql.Named("PasswordHash", hash),
-		sql.Named("UserId", userID),
-	)
-	if err != nil {
-		logger.Logger().Error("Error updating user password", zap.Error(err))
 		return err
 	}
 	return nil

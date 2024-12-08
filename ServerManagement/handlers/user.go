@@ -51,6 +51,13 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Error authenticating user"})
 		return
 	}
+	// Fetch user details to check PasswordResetRequired
+	user, err := repository.GetUserByUsername(req.Username)
+	if err != nil {
+		logger.Logger().Error("Error fetching user details", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching user details"})
+		return
+	}
 
 	cookie := &http.Cookie{
 		Name:     "auth_token",
@@ -68,8 +75,10 @@ func Login(c *gin.Context) {
 
 	// Send response with the token in JSON
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful",
-		"token":   token,
+		"message":               "Login successful",
+		"token":                 token,
+		"passwordResetRequired": user.PasswordResetRequired, // Yeni bilgi eklendi
+
 	})
 }
 
@@ -110,7 +119,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	err = services.RegisterUser(req.Username, req.Password, req.RoleId, req.Email)
+	err = services.RegisterUser(req.Username, req.Password, req.RoleId, req.Email, true)
 	if err != nil {
 		logger.Logger().Error("Error registering user", zap.Error(err))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error registering user"})
@@ -312,4 +321,36 @@ func ForgotPasswordHandler(c *gin.Context) {
 	// Send the reset email (email sending logic should be added here)
 	logger.Logger().Info("Password reset link sent", zap.String("email", req.Email))
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset link sent", "reset_token": tokenString})
+}
+func ChangePasswordHandler(c *gin.Context) {
+	var req struct {
+		NewPassword string `json:"new_password"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Logger().Error("Invalid request body", zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// Kullanıcı kimliğini JWT'den alın
+	userId, exists := c.Get("user_id")
+	if !exists {
+		logger.Logger().Error("User ID not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Yeni şifreyi hash'le
+	hashedPassword := services.HashPasswordSHA256(req.NewPassword)
+
+	// Şifreyi ve PasswordResetRequired alanını güncelle
+	err := repository.UpdateUserPassword(userId.(int), hashedPassword)
+	if err != nil {
+		logger.Logger().Error("Error updating password", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating password"})
+		return
+	}
+	logger.Logger().Info("Password updated successfully", zap.Int("user_id", userId.(int)))
+	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
 }

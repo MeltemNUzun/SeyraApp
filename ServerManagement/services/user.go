@@ -43,7 +43,7 @@ func AuthenticateUser(username, password string) (string, error) {
 }
 
 // RegisterUser registers a new user in the system.
-func RegisterUser(username, password string, roleId int, email string) error {
+func RegisterUser(username, password string, roleId int, email string, passwordResetRequired bool) error {
 
 	// Hash the password using SHA-256
 	passwordHash := HashPasswordSHA256(password)

@@ -26,9 +26,18 @@ function Login() {
 
       if (response.data.message === 'Login successful') {
         const token = response.data.token;
+        const passwordResetRequired = response.data.passwordResetRequired; // passwordResetRequired bilgisi alınıyor
+
         localStorage.setItem('auth_token', token);
         showNotification('Login successful', 'success');
-        navigate('/home');
+
+        if (passwordResetRequired) {
+          // Şifre değiştirme ekranına yönlendirme
+          navigate('/change-password');
+        } else {
+          // Ana sayfaya yönlendirme
+          navigate('/home');
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
