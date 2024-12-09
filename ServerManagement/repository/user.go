@@ -14,7 +14,7 @@ import (
 func GetUserByUsername(username string) (*models.User, error) {
 	user := &models.User{}
 	err := database.DB.QueryRow(
-		"SELECT UserId, Username, PasswordHash, RoleId, password_reset_required FROM dbo.Users WHERE Username = @Username",
+		"SELECT UserId, Username, PasswordHash, RoleId, PasswordResetRequired FROM dbo.Users WHERE Username = @Username",
 		sql.Named("Username", username),
 	).Scan(&user.UserId, &user.Username, &user.PasswordHash, &user.RoleId, &user.PasswordResetRequired)
 

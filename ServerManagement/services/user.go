@@ -33,7 +33,7 @@ func AuthenticateUser(username, password string) (string, error) {
 	}
 
 	// Generate JWT Token
-	token, err := middlewares.GenerateToken(user.RoleId)
+	token, err := middlewares.GenerateToken(user.RoleId, user.UserId)
 	if err != nil {
 		logger.Logger().Error("Error generating token", zap.Error(err))
 		return "", err

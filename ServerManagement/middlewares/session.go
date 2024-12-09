@@ -15,14 +15,16 @@ var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 // Claims struct for the JWT, containing standard claims and custom RoleId.
 type Claims struct {
 	RoleId int `json:"role_id"`
+	UserID int `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
 // GenerateToken generates a new JWT token for a given role ID.
-func GenerateToken(roleId int) (string, error) {
+func GenerateToken(roleId, userId int) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour) // Token expires in 24 hours.
 	claims := &Claims{
-		RoleId: roleId, // roleId doğru olarak burada atanmalı
+		RoleId: roleId,
+		UserID: userId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -65,6 +67,7 @@ func ValidateToken() gin.HandlerFunc {
 
 		// Set role ID to context, can be used in handlers to identify role of the user
 		c.Set("role_id", claims.RoleId)
+		c.Set("user_id", claims.UserID)
 		fmt.Printf("Role ID from token: %d\n", claims.RoleId)
 		c.Next()
 	}

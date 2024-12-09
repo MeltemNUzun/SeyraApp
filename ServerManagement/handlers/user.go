@@ -324,7 +324,7 @@ func ForgotPasswordHandler(c *gin.Context) {
 }
 func ChangePasswordHandler(c *gin.Context) {
 	var req struct {
-		NewPassword string `json:"new_password"`
+		NewPassword string `json:"newPassword"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
