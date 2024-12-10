@@ -67,7 +67,7 @@ function ServerLogs() {
     }
 
     if (logType) {
-      filtered = filtered.filter((log) => log.logTypeId === logType);
+      filtered = filtered.filter((log) => log.log_type_id === parseInt(logType, 10));
     }
 
     if (startDate && endDate) {
@@ -100,8 +100,7 @@ function ServerLogs() {
   // DataGrid sütunları
   const columns = [
     { field: 'timestamp', headerName: 'Timestamp', flex: 1 },
-    { field: 'logTypeId', headerName: 'Log Type', flex: 1 },
-    { field: 'serverName', headerName: 'Server Name', flex: 1 },
+    { field: 'log_type_id', headerName: 'Log Type ID', flex: 1 }, // Backend'deki tanıma göre düzenlendi
     { field: 'importance', headerName: 'Importance', flex: 1 },
     { field: 'message', headerName: 'Message', flex: 2 },
   ];
@@ -161,9 +160,9 @@ function ServerLogs() {
             onChange={(e) => setLogType(e.target.value)}
           >
             <MenuItem value="">All</MenuItem>
-            <MenuItem value="INFO">INFO</MenuItem>
-            <MenuItem value="WARN">WARN</MenuItem>
-            <MenuItem value="ERROR">ERROR</MenuItem>
+            <MenuItem value="1">INFO</MenuItem>
+            <MenuItem value="2">WARN</MenuItem>
+            <MenuItem value="3">ERROR</MenuItem>
           </Select>
         </FormControl>
         <FormControl fullWidth>
@@ -199,13 +198,13 @@ function ServerLogs() {
 
       {/* Log Listesi */}
       <Box sx={{ height: 400, width: '100%' }}>
-  <DataGrid
-    rows={filteredLogs}
-    columns={columns}
-    pageSize={5}
-    getRowId={(row) => row.log_id || row.id || Math.random().toString(36).substr(2, 9)}
-  />
-</Box>
+        <DataGrid
+          rows={filteredLogs}
+          columns={columns}
+          pageSize={5}
+          getRowId={(row) => row.log_id || row.id || Math.random().toString(36).substr(2, 9)}
+        />
+      </Box>
 
       {/* Bildirim Alanı */}
       <Snackbar

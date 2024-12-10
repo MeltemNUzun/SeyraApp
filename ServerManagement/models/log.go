@@ -10,6 +10,6 @@ type Log struct {
 	LogTypeId  int            `json:"log_type_id"`
 	Timestamp  time.Time      `json:"timestamp"`
 	Message    string         `json:"message"`
-	Importance sql.NullString `json:"importance,omitempty"` // Null ise JSON'da gösterilmez
+	Importance sql.NullString `json:"importance"` // Null ise JSON'da gösterilmez
 	ServerId   int            `json:"server_id"`
 }
