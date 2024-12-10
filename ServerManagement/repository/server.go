@@ -99,9 +99,25 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 
 	// Veritabanı sorgusu
 	rows, err = database.DB.Query(
-		"SELECT LogId, LogTypeId, Timestamp, Message, Importance, ServerId FROM dbo.Logs WHERE ServerId = @ServerId",
+		`SELECT 
+			logs.LogId, 
+			logs.LogTypeId, 
+			log_types.Name AS LogTypeName, 
+			logs.Timestamp, 
+			logs.Message, 
+			logs.Importance, 
+			logs.ServerId
+		 FROM 
+			dbo.Logs logs
+		 JOIN 
+			dbo.LogTypes log_types 
+		 ON 
+			logs.LogTypeId = log_types.Id
+		 WHERE 
+			logs.ServerId = @ServerId`,
 		sql.Named("ServerId", serverId),
 	)
+
 	if err != nil {
 		logger.Logger().Error("Error fetching logs", zap.Error(err))
 		return nil, err
@@ -114,14 +130,29 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 		var importance sql.NullString // importance için sql.NullString kullanımı
 
 		// Satırı okuma ve modele yerleştirme
-		err := rows.Scan(&log.LogId, &log.LogTypeId, &log.Timestamp, &log.Message, &importance, &log.ServerId)
+		err := rows.Scan(
+			&log.LogId,
+			&log.LogTypeId,
+			&log.LogTypeName, // Yeni alan
+			&log.Timestamp,
+			&log.Message,
+			&importance,
+			&log.ServerId,
+		)
 		if err != nil {
 			logger.Logger().Error("Error scanning log", zap.Error(err))
 			return nil, err
 		}
 
+		// Importance alanını dönüştür
+		if importance.Valid {
+			log.Importance = importance.String
+		} else {
+			log.Importance = ""
+		}
+
 		// importance alanını log.Importance'a doğru şekilde atama
-		log.Importance = importance
+		log.UnmarshalLog(importance)
 
 		// Log'u listeye ekle
 		logs = append(logs, log)

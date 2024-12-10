@@ -52,33 +52,40 @@ function ServerLogs() {
     }
   }, [serverId]);
 
-  // Logları filtreleme
   useEffect(() => {
     let filtered = logs;
-
+  
+    // Search filter
     if (searchTerm) {
       filtered = filtered.filter((log) =>
         log.message.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
+  
+    // Importance filter
     if (importance) {
       filtered = filtered.filter((log) => log.importance === importance);
     }
-
+  
+    // Log type filter
     if (logType) {
       filtered = filtered.filter((log) => log.log_type_id === parseInt(logType, 10));
     }
-
+  
+    // Date and time filter
     if (startDate && endDate) {
+      const start = new Date(startDate).getTime(); // Start date as timestamp
+      const end = new Date(endDate).getTime(); // End date as timestamp
+  
       filtered = filtered.filter((log) => {
-        const logDate = new Date(log.timestamp);
-        return logDate >= new Date(startDate) && logDate <= new Date(endDate);
+        const logDate = new Date(log.timestamp).getTime(); // Log timestamp
+        return logDate >= start && logDate <= end; // Compare timestamps
       });
     }
-
+  
     setFilteredLogs(filtered);
   }, [logs, searchTerm, importance, logType, startDate, endDate]);
+  
 
   // Bildirim kapatma
   const handleNotificationClose = () => {
@@ -100,7 +107,7 @@ function ServerLogs() {
   // DataGrid sütunları
   const columns = [
     { field: 'timestamp', headerName: 'Timestamp', flex: 1 },
-    { field: 'log_type_id', headerName: 'Log Type ID', flex: 1 }, // Backend'deki tanıma göre düzenlendi
+    { field: 'logTypeName', headerName: 'Log Type', flex: 1 }, // Backend'deki tanıma göre düzenlendi
     { field: 'importance', headerName: 'Importance', flex: 1 },
     { field: 'message', headerName: 'Message', flex: 2 },
   ];
