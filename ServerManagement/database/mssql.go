@@ -3,9 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"go.uber.org/zap"
 	"os"
 	"server-management/logger"
+
+	"go.uber.org/zap"
 
 	_ "github.com/denisenkom/go-mssqldb" // SQL Server driver
 )
@@ -29,7 +30,7 @@ func Setup() {
 	}
 
 	// Build the connection string
-	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s",
+	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;encrypt=true;trustServerCertificate=true",
 		server, user, password, port, database)
 
 	// Open the database connection

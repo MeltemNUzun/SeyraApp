@@ -1,24 +1,44 @@
-import React from 'react';
-import { Container, Typography, Box, Button, Grid } from '@mui/material';
+import React, { useState } from 'react';
+import { Container, Typography, Box, Button, Grid, Snackbar, Alert } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import StorageIcon from '@mui/icons-material/Storage';
 import api from "../axiosConfig";
 
 function Home() {
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'info', // 'success', 'error', 'warning', 'info'
+  });
+
   const handleLogout = async () => {
     try {
       const response = await api.post('http://127.0.0.1:8080/api/v1/logout');
-      alert(response.data.message);
-      window.location.href = '/login';
+      setNotification({
+        open: true,
+        message: response.data.message,
+        severity: 'success',
+      });
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1500); // Redirect after 1.5 seconds
     } catch (error) {
       console.error("Çıkış yapılırken hata oluştu:", error);
-      alert("Çıkış yapılamadı.");
+      setNotification({
+        open: true,
+        message: "Çıkış yapılamadı.",
+        severity: 'error',
+      });
     }
+  };
+
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
   };
 
   return (
     <>
-      {/* Çıkış Butonu */}
+      {/* Logout Button */}
       <Button
         variant="contained"
         color="error"
@@ -36,6 +56,18 @@ function Home() {
         Logout
       </Button>
 
+      {/* Notification */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={4000} // Closes after 4 seconds
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseNotification} severity={notification.severity} sx={{ width: '100%' }}>
+          {notification.message}
+        </Alert>
+      </Snackbar>
+
       <Container
         component="main"
         maxWidth="md"
@@ -47,7 +79,7 @@ function Home() {
           textAlign: 'center',
         }}
       >
-        {/* Welcome Başlığı ve Alt Başlık */}
+        {/* Welcome Section */}
         <Box mb={4}>
           <Typography
             component="h2"
@@ -74,7 +106,7 @@ function Home() {
           </Typography>
         </Box>
 
-        {/* Yönetim Kartları */}
+        {/* Management Cards */}
         <Grid container spacing={3} justifyContent="center">
           <Grid item xs={12} sm={6} md={4}>
             <Button

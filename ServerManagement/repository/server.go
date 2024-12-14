@@ -97,25 +97,19 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 	var rows *sql.Rows
 	var err error
 
-	// Veritabanı sorgusu
-	rows, err = database.DB.Query(
-		`SELECT 
-			logs.LogId, 
-			logs.LogTypeId, 
-			log_types.Name AS LogTypeName, 
-			logs.Timestamp, 
-			logs.Message, 
-			logs.Importance, 
-			logs.ServerId
-		 FROM 
-			dbo.Logs logs
-		 JOIN 
-			dbo.LogTypes log_types 
-		 ON 
-			logs.LogTypeId = log_types.Id
-		 WHERE 
-			logs.ServerId = @ServerId`,
-		sql.Named("ServerId", serverId),
+	rows, err = database.DB.Query(`
+    SELECT 
+        logs.LogId,
+        logs.LogTypeId,
+        log_types.LogTypeName,
+        logs.Timestamp,
+        logs.Message,
+        logs.Importance,
+        logs.ServerId
+    FROM Logs logs
+    LEFT JOIN LogTypes log_types
+    ON logs.LogTypeId = log_types.LogTypeId;`,
+		sql.Named("ServerId", serverId), // Burada parametre ekleniyor
 	)
 
 	if err != nil {
@@ -128,12 +122,13 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 	for rows.Next() {
 		var log models.Log
 		var importance sql.NullString // importance için sql.NullString kullanımı
+		var logTypeName sql.NullString
 
 		// Satırı okuma ve modele yerleştirme
 		err := rows.Scan(
 			&log.LogId,
 			&log.LogTypeId,
-			&log.LogTypeName, // Yeni alan
+			&logTypeName, // Yeni alan
 			&log.Timestamp,
 			&log.Message,
 			&importance,
@@ -149,6 +144,11 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 			log.Importance = importance.String
 		} else {
 			log.Importance = ""
+		}
+		if logTypeName.Valid {
+			log.LogTypeName = logTypeName.String
+		} else {
+			log.LogTypeName = "Unknown" // NULL değerler için varsayılan atama
 		}
 
 		// importance alanını log.Importance'a doğru şekilde atama

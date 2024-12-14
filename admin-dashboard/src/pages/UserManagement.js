@@ -20,7 +20,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import { Card, CardBody, CardTitle } from 'reactstrap';
 import api from '../axiosConfig';
 
-const roles = ['Admin', 'Web Admin', 'Mail Admin', 'Database Admin'];
+const roles = [ 'Web Admin', 'Mail Admin', 'Database Admin'];
 const roleIds = { Admin: 1, 'Web Admin': 2, 'Mail Admin': 3, 'Database Admin': 4 };
 
 const getRoleNameById = (roleId) => {

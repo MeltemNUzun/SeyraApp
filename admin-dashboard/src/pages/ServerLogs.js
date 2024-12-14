@@ -33,7 +33,7 @@ function ServerLogs() {
     setNotification({ open: true, message, severity });
   };
 
-  // Backend'den logları alma
+  // Logları backend'den alma
   const fetchLogs = async () => {
     try {
       const response = await api.get(`/logs/${serverId}`);
@@ -45,7 +45,6 @@ function ServerLogs() {
     }
   };
 
-  // İlk yükleme
   useEffect(() => {
     if (serverId) {
       fetchLogs();
@@ -54,49 +53,48 @@ function ServerLogs() {
 
   useEffect(() => {
     let filtered = logs;
-  
-    // Search filter
+
+    // Arama filtresi
     if (searchTerm) {
       filtered = filtered.filter((log) =>
         log.message.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-  
-    // Importance filter
+
+    // Önem filtresi
     if (importance) {
       filtered = filtered.filter((log) => log.importance === importance);
     }
-  
-    // Log type filter
+
+    // Log türü filtresi
     if (logType) {
       filtered = filtered.filter((log) => log.log_type_id === parseInt(logType, 10));
     }
-  
-    // Date and time filter
+
+    // Tarih filtresi
     if (startDate && endDate) {
-      const start = new Date(startDate).getTime(); // Start date as timestamp
-      const end = new Date(endDate).getTime(); // End date as timestamp
-  
+      const start = new Date(startDate).getTime();
+      const end = new Date(endDate).getTime();
+
       filtered = filtered.filter((log) => {
-        const logDate = new Date(log.timestamp).getTime(); // Log timestamp
-        return logDate >= start && logDate <= end; // Compare timestamps
+        const logDate = new Date(log.timestamp).getTime();
+        return logDate >= start && logDate <= end;
       });
     }
-  
+
     setFilteredLogs(filtered);
   }, [logs, searchTerm, importance, logType, startDate, endDate]);
-  
 
-  // Bildirim kapatma
+  // Bildirimi kapatma
   const handleNotificationClose = () => {
     setNotification({ ...notification, open: false });
   };
 
-  // Logout
+  // Çıkış yapma
   const handleLogout = async () => {
     try {
       await api.post('http://127.0.0.1:8080/api/v1/logout');
-      showNotification('Başarıyla çıkış yapıldı', 'success');
+      showNotification('Başarıyla çıkış yapıldı.', 'success');
       navigate('/login');
     } catch (error) {
       console.error('Çıkış yapılırken hata oluştu:', error);
@@ -106,15 +104,14 @@ function ServerLogs() {
 
   // DataGrid sütunları
   const columns = [
-    { field: 'timestamp', headerName: 'Timestamp', flex: 1 },
-    { field: 'logTypeName', headerName: 'Log Type', flex: 1 }, // Backend'deki tanıma göre düzenlendi
-    { field: 'importance', headerName: 'Importance', flex: 1 },
-    { field: 'message', headerName: 'Message', flex: 2 },
+    { field: 'timestamp', headerName: 'Zaman Damgası', flex: 1 },
+    { field: 'log_type_name', headerName: 'Log Türü', flex: 1 },
+    { field: 'importance', headerName: 'Önem Derecesi', flex: 1 },
+    { field: 'message', headerName: 'Mesaj', flex: 2 },
   ];
 
   return (
     <Container component="main" maxWidth="lg">
-      {/* Logout Butonu */}
       <Box
         sx={{
           display: 'flex',
@@ -123,11 +120,10 @@ function ServerLogs() {
         }}
       >
         <Button variant="contained" color="secondary" onClick={handleLogout}>
-          Logout
+          Çıkış Yap
         </Button>
       </Box>
 
-      {/* Başlık */}
       <Typography
         variant="h4"
         align="center"
@@ -138,10 +134,9 @@ function ServerLogs() {
           fontWeight: 'bold',
         }}
       >
-        Server Logs
+        Sunucu Logları
       </Typography>
 
-      {/* Filtreler */}
       <Box
         sx={{
           display: 'flex',
@@ -153,41 +148,41 @@ function ServerLogs() {
         }}
       >
         <TextField
-          label="Search Logs"
+          label="Loglarda Ara"
           variant="outlined"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           fullWidth
         />
         <FormControl fullWidth>
-          <InputLabel id="logType-label">Log Type</InputLabel>
+          <InputLabel id="logType-label">Log Türü</InputLabel>
           <Select
             labelId="logType-label"
             value={logType}
             onChange={(e) => setLogType(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="1">INFO</MenuItem>
+            <MenuItem value="">ALL</MenuItem>
+            <MenuItem value="3">INFO</MenuItem>
             <MenuItem value="2">WARN</MenuItem>
-            <MenuItem value="3">ERROR</MenuItem>
+            <MenuItem value="1">ERROR</MenuItem>
           </Select>
         </FormControl>
         <FormControl fullWidth>
-          <InputLabel id="importance-label">Importance</InputLabel>
+          <InputLabel id="importance-label">Önem Derecesi</InputLabel>
           <Select
             labelId="importance-label"
             value={importance}
             onChange={(e) => setImportance(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Low">Low</MenuItem>
-            <MenuItem value="Medium">Medium</MenuItem>
-            <MenuItem value="High">High</MenuItem>
+            <MenuItem value="">ALL</MenuItem>
+            <MenuItem value="Low">LOW</MenuItem>
+            <MenuItem value="Medium">MEDIUM</MenuItem>
+            <MenuItem value="High">HIGH</MenuItem>
           </Select>
         </FormControl>
         <TextField
           type="datetime-local"
-          label="Start Date & Time"
+          label="Başlangıç Tarihi ve Saati"
           InputLabelProps={{ shrink: true }}
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
@@ -195,7 +190,7 @@ function ServerLogs() {
         />
         <TextField
           type="datetime-local"
-          label="End Date & Time"
+          label="Bitiş Tarihi ve Saati"
           InputLabelProps={{ shrink: true }}
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
@@ -203,17 +198,20 @@ function ServerLogs() {
         />
       </Box>
 
-      {/* Log Listesi */}
       <Box sx={{ height: 400, width: '100%' }}>
         <DataGrid
           rows={filteredLogs}
           columns={columns}
           pageSize={5}
           getRowId={(row) => row.log_id || row.id || Math.random().toString(36).substr(2, 9)}
+          sx={{
+            '& .MuiDataGrid-row': {
+              backgroundColor: '#ffffff', // Tüm satırların arka planını beyaz yapar
+            },
+          }}
         />
       </Box>
 
-      {/* Bildirim Alanı */}
       <Snackbar
         open={notification.open}
         autoHideDuration={4000}
