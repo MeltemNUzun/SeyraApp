@@ -51,3 +51,33 @@ func GetLogsByServerId(serverID int) ([]models.Log, error) {
 	// Logları döndür
 	return logs, nil
 }
+
+// GetDashboardStats sunucu ID'ye göre logların istatistiklerini döndürür.
+func GetDashboardStats(serverID int) (map[string]interface{}, error) {
+	logs, err := repository.GetLogsByServerId(serverID)
+	if err != nil {
+		logger.Logger().Error("Dashboard için loglar çekilirken hata oluştu", zap.Error(err))
+		return nil, err
+	}
+
+	// Önem Derecesine Göre Log Sayıları
+	importanceStats := map[string]int{
+		"High":   0,
+		"Medium": 0,
+		"Low":    0,
+	}
+
+	// Günlük Log Dağılımı
+	logsByDate := make(map[string]int)
+
+	for _, log := range logs {
+		importanceStats[log.Importance]++
+		logDate := log.Timestamp.Format("2006-01-02")
+		logsByDate[logDate]++
+	}
+
+	return map[string]interface{}{
+		"importanceStats": importanceStats,
+		"logsByDate":      logsByDate,
+	}, nil
+}

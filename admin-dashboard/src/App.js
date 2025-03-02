@@ -1,29 +1,30 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import { HelmetProvider } from 'react-helmet-async';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import UserManagement from './pages/UserManagement';
 import ServerManagement from './pages/ServerManagement';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import ChangePassword from './pages/ChangePassword'; // Yeni sayfa import edildi
-import Layout from './components/Layout'; // Layout bileşenini import ettik
+import ChangePassword from './pages/ChangePassword';
+import Layout from './components/Layout';
 import ServerLogs from './pages/ServerLogs';
+import DashboardPage from "./pages/DashboardPage"; // Dashboard Sayfası
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
-    <Router>
+    <Router> {/* Sadece BİR Router olacak */}
       <Routes>
-        {/* Login Sayfası (Sabit layout olmadan gösterilecek) */}
+        {/* Login Sayfası (Layout olmadan) */}
         <Route
           path="/"
           element={
             <>
-              <Helmet>
+             <HelmetProvider>
                 <title>SEYRA - Giriş Yap</title>
-              </Helmet>
+              </HelmetProvider>
               <Login />
             </>
           }
@@ -36,9 +37,9 @@ function App() {
             path="/home"
             element={
               <>
-                <Helmet>
+                <HelmetProvider>
                   <title>SEYRA - Ana Sayfa</title>
-                </Helmet>
+                </HelmetProvider>
                 <Home />
               </>
             }
@@ -49,9 +50,9 @@ function App() {
             path="/user-management"
             element={
               <>
-                <Helmet>
+                <HelmetProvider>
                   <title>SEYRA - Kullanıcı Yönetimi</title>
-                </Helmet>
+                </HelmetProvider>
                 <UserManagement />
               </>
             }
@@ -62,9 +63,9 @@ function App() {
             path="/server-management"
             element={
               <>
-                <Helmet>
+                <HelmetProvider>
                   <title>SEYRA - Sunucu Yönetimi</title>
-                </Helmet>
+                </HelmetProvider>
                 <ServerManagement />
               </>
             }
@@ -75,9 +76,9 @@ function App() {
             path="/forgot-password"
             element={
               <>
-                <Helmet>
+               <HelmetProvider>
                   <title>SEYRA - Şifremi Unuttum</title>
-                </Helmet>
+                </HelmetProvider>
                 <ForgotPassword />
               </>
             }
@@ -88,9 +89,9 @@ function App() {
             path="/reset-password/:token"
             element={
               <>
-                <Helmet>
+                <HelmetProvider>
                   <title>SEYRA - Şifreyi Sıfırla</title>
-                </Helmet>
+                </HelmetProvider>
                 <ResetPassword />
               </>
             }
@@ -101,9 +102,9 @@ function App() {
             path="/change-password"
             element={
               <>
-                <Helmet>
+                <HelmetProvider>
                   <title>SEYRA - Şifre Değiştir</title>
-                </Helmet>
+                </HelmetProvider>
                 <ChangePassword />
               </>
             }
@@ -114,10 +115,23 @@ function App() {
             path="/server-logs/:serverId"
             element={
               <>
-                <Helmet>
+               <HelmetProvider>
                   <title>SEYRA - Sunucu Logları</title>
-                </Helmet>
+                </HelmetProvider>
                 <ServerLogs />
+              </>
+            }
+          />
+
+          {/* Dashboard Sayfası */}
+          <Route
+            path="/dashboard/:serverId"
+            element={
+              <>
+               <HelmetProvider>
+                  <title>SEYRA - Dashboard</title>
+                </HelmetProvider>
+                <DashboardPage />
               </>
             }
           />

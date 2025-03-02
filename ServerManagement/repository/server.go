@@ -91,12 +91,10 @@ func DeleteServerById(serverId int) error {
 	return nil
 }
 
-// GetLogsByServerId sunucu ID'sine göre logları getirir
 func GetLogsByServerId(serverId int) ([]models.Log, error) {
 	var logs []models.Log
 	var rows *sql.Rows
 	var err error
-
 	rows, err = database.DB.Query(`
     SELECT 
         logs.LogId,
@@ -108,27 +106,27 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
         logs.ServerId
     FROM Logs logs
     LEFT JOIN LogTypes log_types
-    ON logs.LogTypeId = log_types.LogTypeId;`,
-		sql.Named("ServerId", serverId), // Burada parametre ekleniyor
+    ON logs.LogTypeId = log_types.LogTypeId
+    WHERE logs.ServerId = @ServerId;`,
+		sql.Named("ServerId", serverId), // ✅ MSSQL için doğru parametre bağlama
 	)
 
 	if err != nil {
 		logger.Logger().Error("Error fetching logs", zap.Error(err))
 		return nil, err
 	}
-	defer rows.Close() // Açık bağlantıları kapatmak için eklenmiştir
+	defer rows.Close()
 
 	// Veritabanı sonuçlarını okuma
 	for rows.Next() {
 		var log models.Log
-		var importance sql.NullString // importance için sql.NullString kullanımı
+		var importance sql.NullString
 		var logTypeName sql.NullString
 
-		// Satırı okuma ve modele yerleştirme
 		err := rows.Scan(
 			&log.LogId,
 			&log.LogTypeId,
-			&logTypeName, // Yeni alan
+			&logTypeName,
 			&log.Timestamp,
 			&log.Message,
 			&importance,
@@ -148,11 +146,8 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 		if logTypeName.Valid {
 			log.LogTypeName = logTypeName.String
 		} else {
-			log.LogTypeName = "Unknown" // NULL değerler için varsayılan atama
+			log.LogTypeName = "Unknown"
 		}
-
-		// importance alanını log.Importance'a doğru şekilde atama
-		log.UnmarshalLog(importance)
 
 		// Log'u listeye ekle
 		logs = append(logs, log)
@@ -164,5 +159,5 @@ func GetLogsByServerId(serverId int) ([]models.Log, error) {
 		return nil, err
 	}
 
-	return logs, nil // Log listesi döndür
+	return logs, nil
 }
