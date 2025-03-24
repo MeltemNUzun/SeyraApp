@@ -2,11 +2,13 @@ package middlewares
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
 	"net/http"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // Secret key for signing JWT tokens - this should be kept secure.
@@ -40,10 +42,8 @@ func GenerateToken(roleId, userId int) (string, error) {
 // ValidateToken middleware to validate incoming requests with JWT token.
 func ValidateToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// First check if there is a token in the Authorization header
 		tokenString := c.GetHeader("Authorization")
 
-		// If there is no token in the Authorization header, check from cookies
 		if tokenString == "" {
 			tokenCookie, err := c.Cookie("auth_token")
 			if err != nil {
@@ -53,6 +53,10 @@ func ValidateToken() gin.HandlerFunc {
 			}
 			tokenString = tokenCookie
 		}
+
+		// ✅ Bearer varsa temizle
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+		tokenString = strings.TrimSpace(tokenString)
 
 		claims := &Claims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -65,7 +69,6 @@ func ValidateToken() gin.HandlerFunc {
 			return
 		}
 
-		// Set role ID to context, can be used in handlers to identify role of the user
 		c.Set("role_id", claims.RoleId)
 		c.Set("user_id", claims.UserID)
 		fmt.Printf("Role ID from token: %d\n", claims.RoleId)

@@ -3,6 +3,8 @@ import { Container, Typography, Box, Button } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../axiosConfig";
 import Dashboard from "../components/Dashboard"; // Dashboard bileşeni
+import ChatBot from "../components/ChatBot";
+
 
 function DashboardPage() {
   const { serverId } = useParams(); // URL'den sunucu ID'sini al
@@ -46,6 +48,7 @@ function DashboardPage() {
         </Button>
       </Box>
       <Dashboard serverId={serverId} />
+      <ChatBot serverId={serverId} /> {/* ✅ Server ID geçildi */}
     </Container>
   );
 }
