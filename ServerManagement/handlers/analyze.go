@@ -90,7 +90,7 @@ func AnalyzeLogsByRange(c *gin.Context) {
 
 	// Tarih aralığını hesapla
 	var since time.Time
-	now := time.Now()
+	now := time.Now().Local()
 
 	switch req.Range {
 	case "daily":
@@ -105,8 +105,9 @@ func AnalyzeLogsByRange(c *gin.Context) {
 	}
 
 	// MSSQL'den logları çek
-	query := `SELECT Message FROM logs WHERE ServerId = @p1 AND Timestamp >= @p2`
-	rows, err := database.DB.Query(query, req.ServerID, since)
+	until := now
+	query := `SELECT Message FROM logs WHERE ServerId = @p1 AND Timestamp BETWEEN @p2 AND @p3`
+	rows, err := database.DB.Query(query, req.ServerID, since, until)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Veritabanı hatası", "details": err.Error()})
 		return
