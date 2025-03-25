@@ -67,6 +67,7 @@ func SetupRouter() *gin.Engine {
 		v1.POST("/change-password", handlers.ChangePasswordHandler) // Yeni rota eklendi
 		v1.GET("/dashboard/:server_id", handlers.GetDashboardStats)
 		v1.POST("/analyze-message", handlers.AnalyzeMessage)
+		v1.POST("/analyze-logs-by-range", handlers.AnalyzeLogsByRange)
 
 	}
 

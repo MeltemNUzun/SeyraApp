@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"server-management/database"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,9 +57,7 @@ func AnalyzeMessage(c *gin.Context) {
 		tmpFile.WriteString(line + "\n")
 	}
 	tmpFile.Close()
-
-	// Python scripti çağır (deepsek.py)
-	cmd := exec.Command("python", "deepsek.py", tmpFile.Name())
+	cmd := exec.Command("python", "deepsek.py", tmpFile.Name(), req.Message)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -66,7 +65,90 @@ func AnalyzeMessage(c *gin.Context) {
 
 	err = cmd.Run()
 	if err != nil {
-		log.Println("DeepSEK stderr:", stderr.String()) // terminale yaz
+		log.Println("DeepSEK stderr:", stderr.String())
+		log.Println("DeepSEK stdout:", stdout.String())
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "DeepSEK çalıştırılamadı",
+			"details": stderr.String(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"answer": stdout.String()})
+}
+
+func AnalyzeLogsByRange(c *gin.Context) {
+	var req struct {
+		ServerID int    `json:"server_id"`
+		Range    string `json:"range"` // daily, weekly, monthly
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Geçersiz JSON"})
+		return
+	}
+
+	// Tarih aralığını hesapla
+	var since time.Time
+	now := time.Now()
+
+	switch req.Range {
+	case "daily":
+		since = now.AddDate(0, 0, -1)
+	case "weekly":
+		since = now.AddDate(0, 0, -7)
+	case "monthly":
+		since = now.AddDate(0, -1, 0)
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Geçersiz analiz türü"})
+		return
+	}
+
+	// MSSQL'den logları çek
+	query := `SELECT Message FROM logs WHERE ServerId = @p1 AND Timestamp >= @p2`
+	rows, err := database.DB.Query(query, req.ServerID, since)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Veritabanı hatası", "details": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var logs []string
+	for rows.Next() {
+		var msg string
+		if err := rows.Scan(&msg); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Satır okunamadı"})
+			return
+		}
+		logs = append(logs, msg)
+	}
+
+	if len(logs) == 0 {
+		c.JSON(http.StatusOK, gin.H{"answer": "Seçilen tarih aralığında log bulunamadı."})
+		return
+	}
+
+	// Geçici dosyaya yaz
+	tmpFile, err := os.CreateTemp("", "range_logs_*.txt")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Dosya oluşturulamadı"})
+		return
+	}
+	defer os.Remove(tmpFile.Name())
+
+	for _, line := range logs {
+		tmpFile.WriteString(line + "\n")
+	}
+	tmpFile.Close()
+
+	cmd := exec.Command("python", "deepsek.py", tmpFile.Name(), req.Range) // burada da message geçmek istersen ekleyebilirsin
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err = cmd.Run()
+	if err != nil {
+		log.Println("DeepSEK stderr:", stderr.String())
 		log.Println("DeepSEK stdout:", stdout.String())
 
 		c.JSON(http.StatusInternalServerError, gin.H{

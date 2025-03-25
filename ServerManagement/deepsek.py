@@ -1,7 +1,7 @@
 import sys
 import ollama
 
-def analyze_custom_logs(log_file_path):
+def analyze_custom_logs(log_file_path, user_question=""):
     try:
         with open(log_file_path, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f.readlines()]
@@ -24,47 +24,51 @@ def analyze_custom_logs(log_file_path):
                 "message": lines[i+3]
             })
 
-    # Logları string olarak yaz prompt'a göm
-    log_text = "\n".join([f"{log['timestamp']} | {log['level']} | {log['importance']} | {log['message']}" for log in logs])
+    # Logları string olarak yaz
+    log_text = "\n".join([
+        f"{log['timestamp']} | {log['level']} | {log['importance']} | {log['message']}"
+        for log in logs
+    ])
 
-    # Net ve görev odaklı prompt
+    # Yeni prompt (kullanıcı mesajı dahil)
     prompt = f"""
 You are a system log analyst.
 
-Your task is to analyze server logs that include the following fields:
+The user has a specific question about the server status:
+🔍 "{user_question}"
+
+Your task is to answer this question based on the server logs, which include:
 - Timestamp
 - Log Level (Information, Warning, Error)
 - Importance Level (Normal, High, Low)
 - Message
 
 Instructions:
-- Do NOT explain what you are doing.
-- Do NOT write or suggest any code.
-- Do NOT describe the structure of the logs.
-- Just return a very short summary in 1–2 sentences only.
-- Example responses:
-    - "System appears normal."
-    - "2 Error logs and 1 Critical log detected. Check recommended."
+- Focus on answering the user's question based on evidence from the logs.
+- If there's not enough information, say it.
+- Do NOT write or suggest code.
+- Do NOT explain the structure.
+- Keep the response in **1–2 sentences only.**
 
-Respond only with the final summary.
 Logs:
 {log_text}
-"""
+    """
 
     try:
         response = ollama.chat(
             model="deepseek-coder",
             messages=[{"role": "user", "content": prompt}]
         )
-        print("\nLLM Analizi:\n")
         print(response["message"]["content"])
     except Exception as e:
         print(f"LLM Hatası: {str(e)}")
 
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Kullanım: python deepsek.py <log_dosyası>")
+        print("Kullanım: python deepsek.py <log_dosyası> [kullanıcı_mesajı]")
         sys.exit()
 
     log_file_path = sys.argv[1]
-    analyze_custom_logs(log_file_path)
+    user_question = sys.argv[2] if len(sys.argv) > 2 else ""
+    analyze_custom_logs(log_file_path, user_question)

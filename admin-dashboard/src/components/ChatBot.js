@@ -7,7 +7,6 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 import CloseIcon from "@mui/icons-material/Close";
 
 const ChatBot = ({ serverId }) => {
-
   const [open, setOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [userInput, setUserInput] = useState("");
@@ -22,7 +21,37 @@ const ChatBot = ({ serverId }) => {
   const [modalMessage, setModalMessage] = useState("");
   const [modalAdvice, setModalAdvice] = useState("");
 
-  const handleOptionClick = (option) => {
+  const handleSendMessage = async () => {
+    if (!userInput.trim()) return;
+
+    setMessages((prev) => [...prev, { from: "user", text: userInput }]);
+    setUserInput("");
+    setMessages((prev) => [...prev, { from: "bot", text: "Seyra IA yazıyor...", typing: true }]);
+
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch("http://localhost:8080/api/v1/analyze-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ message: userInput, server_id: Number(serverId) })
+      });
+
+      const data = await response.json();
+      setMessages((prev) => prev.filter((msg) => !msg.typing));
+      setMessages((prev) => [...prev, { from: "bot", text: data.answer || "Yanıt alınamadı." }]);
+    } catch (error) {
+      setMessages((prev) => prev.filter((msg) => !msg.typing));
+      setMessages((prev) => [...prev, {
+        from: "bot",
+        text: "⚠️ DeepSEK API'den cevap alınamadı. Lütfen giriş yaptığınızdan emin olun."
+      }]);
+    }
+  };
+
+  const handleOptionClick = async (option) => {
     setSelectedOption(option);
 
     const userText =
@@ -35,105 +64,28 @@ const ChatBot = ({ serverId }) => {
     setMessages((prev) => [...prev, { from: "user", text: userText }]);
     setMessages((prev) => [...prev, { from: "bot", text: "Seyra IA yazıyor...", typing: true }]);
 
-    const steps = [
-      "Analiz başlatılıyor...",
-      "Loglar toplanıyor...",
-      "Anomali kontrolü yapılıyor...",
-      "Analiz tamamlandı ✅",
-      "İşte bazı örnek loglar:"
-    ];
-
-    setTimeout(() => {
-      setMessages((prev) => prev.filter((msg) => !msg.typing));
-      steps.forEach((text, i) => {
-        setTimeout(() => {
-          setMessages((prev) => [...prev, { from: "bot", text }]);
-
-          if (i === steps.length - 1) {
-            setTimeout(() => {
-              const logs = [
-                "[ERROR] 2025-03-22 15:22:14 - CPU aşırı kullanım!",
-                "[WARN] 2025-03-22 15:10:02 - Memory sınırı %85'e ulaştı.",
-                "[INFO] 2025-03-22 14:59:32 - Sistem yeniden başlatıldı."
-              ];
-
-              logs.forEach((log, j) => {
-                setTimeout(() => {
-                  setMessages((prev) => [...prev, { from: "bot", text: log }]);
-                }, j * 500);
-              });
-
-              const errorLogs = logs.filter((log) => log.includes("[ERROR]"));
-              const warnLogs = logs.filter((log) => log.includes("[WARN]"));
-
-              setTimeout(() => {
-                setModalLogs(logs);
-
-                if (errorLogs.length > 0) {
-                  setModalType("error");
-                  setModalTitle("❌ Kritik Hata Tespit Edildi");
-                  setModalMessage("Sistem loglarında ciddi hatalar bulundu.");
-                  setModalAdvice("Lütfen CPU kaynak kullanımını izleyin.");
-                } else if (warnLogs.length > 0) {
-                  setModalType("warning");
-                  setModalTitle("⚠️ Uyarı Tespit Edildi");
-                  setModalMessage("Loglarda bazı potansiyel riskler mevcut.");
-                  setModalAdvice("Bellek kullanımını kontrol etmeniz önerilir.");
-                } else {
-                  setModalType("success");
-                  setModalTitle("✅ Her Şey Yolunda");
-                  setModalMessage("Loglar temiz, bir sorun bulunamadı.");
-                  setModalAdvice("İzleme sisteminizi aynı düzende sürdürün.");
-                }
-
-                setModalOpen(true);
-              }, logs.length * 500 + 500);
-            }, 1000);
-          }
-        }, i * 1000);
-      });
-    }, 1000);
-  };
-
-  const handleSendMessage = async () => {
-    if (!userInput.trim()) return;
-  
-    setMessages((prev) => [...prev, { from: "user", text: userInput }]);
-    setUserInput("");
-  
-    setMessages((prev) => [...prev, { from: "bot", text: "Seyra IA yazıyor...", typing: true }]);
-  // 👇
-  console.log("Sunucuya gönderilen veri:", {
-    message: userInput,
-    server_id: serverId
-  });
-
     try {
-      const token = localStorage.getItem("auth_token"); // 💡 JWT token buradaysa
-  
-      const response = await fetch("http://localhost:8080/api/v1/analyze-message", {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch("http://localhost:8080/api/v1/analyze-logs-by-range", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` // 👈 token ekleniyor
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ message: userInput,   server_id: Number(serverId) })
-       
+        body: JSON.stringify({ server_id: Number(serverId), range: option })
       });
-  
+
       const data = await response.json();
-  
       setMessages((prev) => prev.filter((msg) => !msg.typing));
-      setMessages((prev) => [...prev, { from: "bot", text: data.answer }]);
+      setMessages((prev) => [...prev, { from: "bot", text: data.answer || "Yanıt alınamadı." }]);
     } catch (error) {
       setMessages((prev) => prev.filter((msg) => !msg.typing));
       setMessages((prev) => [...prev, {
         from: "bot",
-        text: "⚠️ DeepSEK API'den cevap alınamadı. Lütfen giriş yaptığınızdan emin olun."
+        text: "⚠️ Log analizi yapılamadı. Lütfen bağlantınızı kontrol edin."
       }]);
     }
   };
-  
 
   const handleDownloadLogs = () => {
     const blob = new Blob([modalLogs.join("\n")], { type: "text/plain;charset=utf-8" });
@@ -148,23 +100,23 @@ const ChatBot = ({ serverId }) => {
   return (
     <>
       {!open && (
-              <IconButton
-              onClick={() => setOpen(true)}
-              sx={{
-                position: "fixed", top: 25, right: 140, width: 80, height: 80,
-                backgroundColor: "#6A1B9A", color: "#fff", zIndex: 9999,
-                boxShadow: "0 0 12px 4px rgba(106, 27, 154, 0.6)",
-                animation: "pulse 2s infinite",
-                "&:hover": { backgroundColor: "#4A148C" },
-                "@keyframes pulse": {
-                  "0%": { boxShadow: "0 0 0px 0px rgba(106,27,154, 0.7)" },
-                  "50%": { boxShadow: "0 0 12px 6px rgba(106,27,154, 0.6)" },
-                  "100%": { boxShadow: "0 0 0px 0px rgba(106,27,154, 0.7)" }
-                }
-              }}
-            >
-              <SmartToyIcon sx={{ fontSize: 45 }} />
-            </IconButton>
+        <IconButton
+          onClick={() => setOpen(true)}
+          sx={{
+            position: "fixed", top: 25, right: 140, width: 80, height: 80,
+            backgroundColor: "#6A1B9A", color: "#fff", zIndex: 9999,
+            boxShadow: "0 0 12px 4px rgba(106, 27, 154, 0.6)",
+            animation: "pulse 2s infinite",
+            "&:hover": { backgroundColor: "#4A148C" },
+            "@keyframes pulse": {
+              "0%": { boxShadow: "0 0 0px 0px rgba(106,27,154, 0.7)" },
+              "50%": { boxShadow: "0 0 12px 6px rgba(106,27,154, 0.6)" },
+              "100%": { boxShadow: "0 0 0px 0px rgba(106,27,154, 0.7)" }
+            }
+          }}
+        >
+          <SmartToyIcon sx={{ fontSize: 45 }} />
+        </IconButton>
       )}
 
       <Drawer
