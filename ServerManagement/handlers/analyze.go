@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -22,7 +23,6 @@ func AnalyzeMessage(c *gin.Context) {
 		return
 	}
 
-	// MSSQL: server_id'ye göre logları al
 	rows, err := database.DB.Query("SELECT Message FROM logs WHERE ServerId = @p1", req.ServerID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Veritabanı hatası"})
@@ -45,7 +45,6 @@ func AnalyzeMessage(c *gin.Context) {
 		return
 	}
 
-	// Geçici dosyaya logları yaz
 	tmpFile, err := os.CreateTemp("", "logs_*.txt")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Dosya oluşturulamadı"})
@@ -57,6 +56,7 @@ func AnalyzeMessage(c *gin.Context) {
 		tmpFile.WriteString(line + "\n")
 	}
 	tmpFile.Close()
+
 	cmd := exec.Command("python", "deepsek.py", tmpFile.Name(), req.Message)
 
 	var stdout, stderr bytes.Buffer
@@ -75,20 +75,26 @@ func AnalyzeMessage(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"answer": stdout.String()})
+	var jsonResp map[string]interface{}
+	if err := json.Unmarshal(stdout.Bytes(), &jsonResp); err != nil {
+		log.Println("Çıktı JSON değil:", stdout.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Yanıt JSON formatında değil"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"answer": jsonResp["response"]})
+
 }
 
 func AnalyzeLogsByRange(c *gin.Context) {
 	var req struct {
 		ServerID int    `json:"server_id"`
-		Range    string `json:"range"` // daily, weekly, monthly
+		Range    string `json:"range"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Geçersiz JSON"})
 		return
 	}
 
-	// Tarih aralığını hesapla
 	var since time.Time
 	now := time.Now().Local()
 
@@ -104,7 +110,6 @@ func AnalyzeLogsByRange(c *gin.Context) {
 		return
 	}
 
-	// MSSQL'den logları çek
 	until := now
 	query := `SELECT Message FROM logs WHERE ServerId = @p1 AND Timestamp BETWEEN @p2 AND @p3`
 	rows, err := database.DB.Query(query, req.ServerID, since, until)
@@ -129,7 +134,6 @@ func AnalyzeLogsByRange(c *gin.Context) {
 		return
 	}
 
-	// Geçici dosyaya yaz
 	tmpFile, err := os.CreateTemp("", "range_logs_*.txt")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Dosya oluşturulamadı"})
@@ -142,7 +146,7 @@ func AnalyzeLogsByRange(c *gin.Context) {
 	}
 	tmpFile.Close()
 
-	cmd := exec.Command("python", "deepsek.py", tmpFile.Name(), req.Range) // burada da message geçmek istersen ekleyebilirsin
+	cmd := exec.Command("python", "deepsek.py", tmpFile.Name(), req.Range)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr

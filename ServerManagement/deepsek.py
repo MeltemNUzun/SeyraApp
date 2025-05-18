@@ -1,37 +1,32 @@
 import sys
+import json
 import ollama
 
 def analyze_custom_logs(log_file_path, user_question=""):
     try:
         with open(log_file_path, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f.readlines()]
-    except FileNotFoundError:
-        print("Log dosyası bulunamadı.")
-        return
 
-    if len(lines) < 4:
-        print("Yetersiz log verisi.")
-        return
+        if len(lines) < 4:
+            print(json.dumps({"error": "Yetersiz log verisi."}), flush=True)
+            return
 
-    # 4 satır = 1 log formatına göre grupla
-    logs = []
-    for i in range(0, len(lines), 4):
-        if i + 3 < len(lines):
-            logs.append({
-                "timestamp": lines[i],
-                "level": lines[i+1],
-                "importance": lines[i+2],
-                "message": lines[i+3]
-            })
+        logs = []
+        for i in range(0, len(lines), 4):
+            if i + 3 < len(lines):
+                logs.append({
+                    "timestamp": lines[i],
+                    "level": lines[i+1],
+                    "importance": lines[i+2],
+                    "message": lines[i+3]
+                })
 
-    # Logları string olarak yaz
-    log_text = "\n".join([
-        f"{log['timestamp']} | {log['level']} | {log['importance']} | {log['message']}"
-        for log in logs
-    ])
+        log_text = "\n".join([
+            f"{log['timestamp']} | {log['level']} | {log['importance']} | {log['message']}"
+            for log in logs
+        ])
 
-    # Yeni prompt (kullanıcı mesajı dahil)
-    prompt = f"""
+        prompt = f"""
 You are a system log analyst.
 
 The user has a specific question about the server status:
@@ -52,17 +47,16 @@ Instructions:
 
 Logs:
 {log_text}
-    """
+"""
 
-    try:
         response = ollama.chat(
-            model="deepseek-coder",
+            model="deepseek-coder:1.3b",
             messages=[{"role": "user", "content": prompt}]
         )
-        print(response["message"]["content"])
-    except Exception as e:
-        print(f"LLM Hatası: {str(e)}")
+        print(json.dumps({"response": response["message"]["content"]}), flush=True)
 
+    except Exception as e:
+        print(json.dumps({"error": f"LLM hatası: {str(e)}"}), flush=True)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
